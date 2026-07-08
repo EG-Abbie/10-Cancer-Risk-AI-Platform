@@ -54,6 +54,39 @@ function readRequestBody(req) {
   });
 }
 
+function findAnswer(rows, questionId) {
+  if (!Array.isArray(rows)) return "";
+  const row = rows.find((item) => item && item.question_id === questionId);
+  return row && row.answer != null ? String(row.answer) : "";
+}
+
+function buildFallbackExcelRow(submission) {
+  const recentDiscomfortText = findAnswer(submission.rows, "recent_discomfort");
+  const noSymptom = /^(無|沒有|無不適|沒有不舒服|目前沒有|none|no|no symptoms|no discomfort)$/iu.test(recentDiscomfortText.trim());
+
+  return {
+    ...submission.optimized_feature_row,
+    submitted_at: submission.submitted_at || new Date().toISOString(),
+    email: submission.email || findAnswer(submission.rows, "email"),
+    recent_discomfort_text: recentDiscomfortText,
+    recent_discomfort_no_symptom: noSymptom ? 1 : 0,
+    recent_discomfort_body_parts: "",
+    recent_discomfort_symptoms: "",
+    recent_discomfort_duration: "",
+    recent_discomfort_severity: "",
+    recent_discomfort_care_seeking: "",
+    recent_discomfort_follow_up: "",
+    recent_discomfort_ready_to_close: noSymptom ? 1 : 0
+  };
+}
+
+function normalizeSubmission(submission) {
+  if (!submission.excel_row || typeof submission.excel_row !== "object") {
+    submission.excel_row = buildFallbackExcelRow(submission);
+  }
+  return submission;
+}
+
 async function forwardSubmission(req, res) {
   if (!POWER_AUTOMATE_WEBHOOK_URL) {
     sendJson(res, 503, {
@@ -76,6 +109,7 @@ async function forwardSubmission(req, res) {
     sendJson(res, 422, { ok: false, error: "Missing optimized_feature_row." });
     return;
   }
+  submission = normalizeSubmission(submission);
 
   try {
     const response = await fetch(POWER_AUTOMATE_WEBHOOK_URL, {
