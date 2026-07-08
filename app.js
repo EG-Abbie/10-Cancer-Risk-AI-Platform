@@ -1,0 +1,1310 @@
+const SUBMISSION_ENDPOINT = "/api/submit";
+
+const modules = [
+  { id: "consent", title: "知情同意", summary: "先確認個資告知與非診斷性質。" },
+  { id: "basic", title: "基本資料", summary: "收集年齡、身高體重、運動與性別等基本資訊。" },
+  { id: "female", title: "女性相關資訊", summary: "依性別條件詢問月經、生育、哺乳、子宮頸抹片與荷爾蒙用藥。" },
+  { id: "exposure", title: "菸草與環境暴露", summary: "整理抽菸、二手菸、油煙、空污與輻射等暴露因子。" },
+  { id: "mental", title: "心理健康", summary: "記錄近期壓力、睡眠與情緒困擾頻率。" },
+  { id: "diet", title: "飲食習慣", summary: "收集飲食型態、常見食物、牛奶、豆製品與益生菌習慣。" },
+  { id: "history", title: "病史與家族史", summary: "確認個人癌症、慢性疾病與家族癌症史。" },
+  { id: "symptoms", title: "近期身體狀況", summary: "補充最近三個月是否有身體不適。" },
+  { id: "contact", title: "聯絡資料", summary: "填寫接收結果報告的 Email。" },
+  { id: "confirm", title: "資料確認", summary: "送出前，請確認填答內容。" },
+  { id: "result", title: "完成送出", summary: "感謝您的填答。" }
+];
+
+const consentOptions = [
+  "我已閱讀並同意個人資料保護告知事項，同意愛立基生醫股份有限公司依所述目的收集、處理及利用我的個人資料。",
+  "我了解本評估結果的準確度受限於數據庫與演算法，若風險不高不代表沒有風險，若風險較高也不代表已罹病。",
+  "我了解本評估結果僅供個人健康參考，不構成醫療診斷，如有疑慮應諮詢醫師。"
+];
+
+const cancerOptions = ["乳癌", "攝護腺癌", "肺癌", "頭頸癌", "胰臟癌", "肝癌", "大腸直腸癌", "胃癌", "子宮內膜癌", "膀胱癌", "腎癌", "其他癌種"];
+
+const questions = [
+  {
+    id: "consent_acknowledgement",
+    module: "consent",
+    type: "multi",
+    required: true,
+    title: "在開始填寫前，請確認您已閱讀並同意以下事項",
+    note: "本平台收集基本資料、生活習慣、健康資訊與病史資料，用於癌症風險評估與健康管理參考；結果不構成醫療診斷。",
+    field: "consent.acknowledgement",
+    options: consentOptions,
+    minSelected: 3
+  },
+  { id: "birth_year", module: "basic", type: "number", required: true, title: "您的出生年（西元）", note: "請輸入 4 位數西元年，例如 1980。", field: "demographics.birth_year", placeholder: "輸入您的答案" },
+  { id: "height_cm", module: "basic", type: "number", required: true, title: "身高（公分）", note: "請輸入目前身高。", field: "demographics.height_cm", placeholder: "例如 165" },
+  { id: "weight_kg", module: "basic", type: "number", required: true, title: "體重（公斤）", note: "請輸入目前體重。", field: "demographics.weight_kg", placeholder: "例如 60" },
+  { id: "weight_change", module: "basic", type: "single", required: true, title: "近半年內，您的體重是否有明顯增加或減少（超過體重 5%）？", note: "若不確定，請選不確定。", field: "demographics.weight_change_over_5_percent", options: ["是", "否", "不確定"] },
+  { id: "exercise_time", module: "basic", type: "single", required: true, title: "每週運動時間", note: "請選擇最接近您一般狀況的選項。", field: "lifestyle.weekly_exercise_time", options: ["幾乎不運動", "30-60 分鐘", "1-2 小時", "多於 2 小時"] },
+  { id: "sex", module: "basic", type: "single", required: true, title: "您的性別？", note: "系統會依您的選擇顯示適用題目。", field: "demographics.sex", options: ["男性", "女性"] },
+
+  { id: "menarche_age", module: "female", type: "single", required: true, title: "初經（第一次月經）來潮年齡", note: "若不確定，可使用下方不確定選項。", field: "female_health.menarche_age", options: ["12 歲以前（含 12 歲）", "13 歲以後（含 13 歲）"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+  { id: "menopause_status", module: "female", type: "single", required: true, title: "目前停經（更年期）狀態", note: "請選擇最接近目前狀況的選項。", field: "female_health.menopause_status", options: ["尚未停經（月經仍規律來）", "已停經（55 歲或以前停經）", "已停經（55 歲或以後停經）", "已切除子宮或卵巢"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+  { id: "first_pregnancy_age", module: "female", type: "single", required: false, title: "第一胎懷孕年齡", note: "若未曾懷孕可選從未懷孕。", field: "female_health.first_pregnancy_age", options: ["從未懷孕", "20 歲以下", "20-30 歲", "31-35 歲", "36 歲以上"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+  { id: "pregnancy_count", module: "female", type: "number", required: false, title: "曾懷孕幾次？", note: "含流產、人工流產、正常生產；0 表示未曾懷孕。", field: "female_health.pregnancy_count", placeholder: "值必須是數字", appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+  { id: "live_birth_count", module: "female", type: "number", required: false, title: "生產胎數？", note: "成功分娩之次數；0 表示未曾生產。", field: "female_health.live_birth_count", placeholder: "值必須是數字", appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+  { id: "breastfeeding", module: "female", type: "single", required: true, title: "產後是否曾哺餵母乳？若有，哺乳時間多長？", note: "若尚未生產，此題請選不適用。", field: "female_health.breastfeeding_history", options: ["從未哺乳", "有哺乳，但少於 6 個月", "有哺乳，超過 6 個月（含 6 個月）", "尚未生產，此題不適用"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+  { id: "pap_smear", module: "female", type: "single", required: true, title: "是否曾做過子宮頸抹片檢查？結果如何？", note: "此題用於子宮頸相關風險因子整理。", field: "female_health.pap_smear_history", options: ["是，歷次結果均正常", "是，曾有異常報告（如 CIN、HPV 陽性等）", "否，從未做過"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+  { id: "hormone_medication", module: "female", type: "single", required: true, title: "過去是否曾使用賀爾蒙藥物？", note: "包含避孕藥、更年期賀爾蒙補充療法 HRT 等。", field: "female_health.hormone_medication", options: ["是，使用超過 1 年", "是，使用不到 1 年", "否，從未使用"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
+
+  { id: "smoking_ever", module: "exposure", type: "single", required: true, title: "是否有抽菸習慣（現在或過去）？", note: "請選擇最接近您狀況的選項。", field: "exposure.smoking_ever", options: ["是", "否"] },
+  { id: "smoking_quit", module: "exposure", type: "single", required: false, title: "若有抽菸習慣，是否已戒菸？", note: "承上題，若選是請補充目前狀態。", field: "exposure.smoking_quit_status", options: ["是，已戒菸", "否，仍在抽菸"], appliesIf: (answers) => getAnswerValue(answers, "exposure.smoking_ever") === "是" },
+  { id: "secondhand_smoke", module: "exposure", type: "single", required: true, title: "是否長期處在二手菸的生活或工作環境？", note: "例如同住者、工作場域或長期固定暴露。", field: "exposure.secondhand_smoke", options: ["是", "否"] },
+  { id: "betel_nut", module: "exposure", type: "single", required: true, title: "是否有嚼檳榔習慣（現在或過去）？", note: "此題用於頭頸癌等相關風險因子。", field: "exposure.betel_nut_ever", options: ["是", "否"] },
+  { id: "cooking_fume", module: "exposure", type: "single", required: true, title: "工作或生活環境是否經常接觸油煙？", note: "例如廚師、長期在廚房烹飪。", field: "exposure.cooking_fume", options: ["是", "否"] },
+  { id: "cooking_frequency", module: "exposure", type: "single", required: false, title: "每週平均烹調次數", note: "若很少烹調，請選少於一次。", field: "exposure.weekly_cooking_frequency", options: ["少於一次", "每週 1-3 次", "每週 4-6 次", "每週 6 次以上"] },
+  { id: "air_pollution", module: "exposure", type: "single", required: true, title: "工作或生活是否長期暴露在空氣污染環境？", note: "例如工廠、交通繁忙區域。", field: "exposure.air_pollution", options: ["是", "否"] },
+  { id: "radiation", module: "exposure", type: "single", required: true, title: "工作或生活是否常接觸輻射？", note: "例如放射科人員。", field: "exposure.radiation_exposure", options: ["是", "否"] },
+
+  { id: "stress", module: "mental", type: "single", required: true, title: "過去一個月，每週感到緊張或焦慮的頻率", note: "請以最近一個月的一般狀況回答。", field: "mental_health.weekly_stress_frequency", options: ["不到 1 天", "2-3 天", "4-5 天", "幾乎每天"] },
+  { id: "sleep_problem", module: "mental", type: "single", required: true, title: "過去一個月，每週睡不好或失眠的頻率", note: "請以最近一個月的一般狀況回答。", field: "mental_health.weekly_sleep_problem_frequency", options: ["不到 1 天", "2-3 天", "4-5 天", "幾乎每天"] },
+  { id: "low_mood", module: "mental", type: "single", required: true, title: "過去一個月，每週情緒低落或憂鬱的頻率", note: "此題僅作為健康風險因子整理，不是心理診斷。", field: "mental_health.weekly_low_mood_frequency", options: ["不到 1 天", "2-3 天", "4-5 天", "幾乎每天"] },
+
+  { id: "diet_type", module: "diet", type: "single", required: true, title: "目前的飲食習慣為何？", note: "請選擇最接近您長期飲食型態的一項。", field: "diet.current_diet_type", options: ["葷食（無特別限制）", "全素", "蛋奶素", "蛋素", "奶素", "植物五辛素", "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）", "彈性蔬食（以植物性食物為主，但偶爾食用肉類、魚類或海鮮）", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）"] },
+  { id: "frequent_foods", module: "diet", type: "multi", required: true, title: "以下哪些是您經常會食用的？", note: "可複選，若都不常食用可選無固定或少量。", field: "diet.frequent_foods", options: ["飲酒（每週至少一次）", "燒烤或油炸食品", "紅肉（牛、羊、豬等）", "醃漬類食品（泡菜、鹹魚等）", "甜食或高糖零食", "含糖飲料", "高脂肪食物（速食、肥肉等）", "乳製品（起司、優格等）", "蔬菜水果（每日攝取）", "咖啡（每週至少 3 次）", "茶（每週至少 3 次）", "素食（以蔬食為主）", "無固定或少量"] },
+  { id: "milk_daily", module: "diet", type: "single", required: true, title: "是否每天飲用牛奶（至少一杯 240ml，含保久乳）？", note: "若偶爾才喝，請選否。", field: "diet.daily_milk", options: ["是，每天飲用", "否，偶爾或不飲用"] },
+  { id: "soy_products", module: "diet", type: "single", required: true, title: "是否經常食用豆類製品？", note: "例如豆漿、豆腐、豆干、毛豆等，每週 3 次以上。", field: "diet.soy_products_3x_week", options: ["是，每週 3 次以上", "否，較少食用"] },
+  { id: "probiotics", module: "diet", type: "single", required: true, title: "是否規律補充益生菌？", note: "例如優酪乳、優格、益生菌補充品等，每週 3 次以上。", field: "diet.probiotics_3x_week", options: ["是，每週 3 次以上", "否，較少補充"] },
+
+  { id: "personal_cancer", module: "history", type: "single", required: true, title: "是否曾罹患癌症（本次評估以外）？", note: "請依照過去是否曾被診斷為癌症回答。", field: "medical_history.personal_cancer_history", options: ["是，曾罹癌", "否"] },
+  { id: "chronic_conditions", module: "history", type: "multi", required: true, title: "是否有以下慢性疾病？", note: "可複選；若無相關病史可選以上皆無。", field: "medical_history.chronic_conditions", options: ["高血壓", "糖尿病／高血糖", "高血脂／高膽固醇", "肝病（B 型肝炎／C 型肝炎／肝硬化）", "胃食道逆流", "心臟病／心律不整", "甲狀腺疾病", "氣喘／慢性肺阻塞（COPD）", "痛風／高尿酸", "關節炎（含類風濕性）", "憂鬱症／焦慮症", "中風病史", "腎臟病／洗腎", "自體免疫疾病（乾燥症、紅斑性狼瘡等）", "以上皆無", "其他慢性疾病"] },
+  { id: "family_cancer", module: "history", type: "single", required: true, title: "家族成員（一等親內）是否有癌症史？", note: "一等親包含父母、兄弟姊妹、子女。", field: "family_history.has_cancer_history", options: ["是", "否", "不清楚"] },
+  { id: "family_self_types", module: "history", type: "multi", required: false, title: "承上題，若有家族成員（一等親內）癌症史，請列出是什麼癌症？", note: "可複選。", field: "family_history.cancer_types_self_side", options: cancerOptions, appliesIf: (answers) => getAnswerValue(answers, "family_history.has_cancer_history") === "是" },
+
+  { id: "recent_discomfort", module: "symptoms", type: "text", required: true, title: "最近三個月是否有身體不適？", note: "若有，請簡短描述症狀、持續時間與是否已就醫；若沒有，請填寫「無」。", field: "recent_health.recent_discomfort", placeholder: "例如：近兩個月容易胃脹、偶爾腹痛，尚未就醫。" },
+  { id: "email", module: "contact", type: "email", required: true, title: "請填寫您的 Email", note: "結果報告將寄送至此 Email。", field: "contact.email", placeholder: "name@example.com" }
+];
+
+const i18n = {
+  en: {
+    ui: {
+      appTitle: "AI Interactive Cancer Risk Assessment",
+      heroTitle: "AI Interactive Cancer Risk Assessment",
+      heroSubtitle: "Complete a 5-8 minute guided health exploration to understand your cancer-related risk factor profile.",
+      trust1: "Not a medical diagnosis",
+      trust2: "Submit only after review",
+      trust3: "Receive a personalized summary",
+      start: "Start Assessment",
+      disclaimer: "This result is for health education and self-management reference only. It is not a medical diagnosis, screening result, or treatment recommendation.",
+      currentSection: "Current Section",
+      quick: "Quick Options",
+      text: "Text Answer",
+      voice: "Voice Answer (In progress)",
+      back: "Back",
+      uncertain: "Not sure how to answer",
+      guideIntro: "I will guide you through a few simple questions to organize lifestyle habits, family history, and health status related to cancer risk. Recent physical symptoms can be answered by text. Voice answer is in progress.",
+      guideDefault: "Previous question completed. Please answer based on your closest everyday situation.",
+      lifestyle: "Lifestyle",
+      familyHistory: "Family History",
+      bodyStatus: "Body Status",
+      guideStatus: "Care・Clarity・Support",
+      progress: "Health exploration progress",
+      questionCount: "Question",
+      of: "of",
+      saveContinue: "Save and Continue",
+      submitReview: "Confirm and Submit",
+      voiceUnavailable: "Voice answer is in progress. Please use text answer for now.",
+      aiTypePrompt: "After you type, I will immediately organize the key points of your physical symptoms and ask one follow-up question if needed.",
+      aiSummaryReady: "I have organized your information",
+      aiSummaryDraft: "I am organizing your current information",
+      aiShortText: "The text is still brief. Please add the main discomfort if applicable.",
+      aiDisclaimer: "This only helps organize what you entered. It is not a medical diagnosis.",
+      confirmTitle: "Please Review Your Answers",
+      confirmSection: "Data Review",
+      confirmSummary: "Please confirm the following answers are correct.",
+      confirmGuide: "Here are the questions and answers you provided. Please review them before submission.",
+      completedSection: "Completed",
+      completedSummary: "Thank you for your response.",
+      completedGuide: "Your answers have been submitted. Please check the email address you provided.",
+      completedTitle: "Thank you for completing the assessment",
+      completedNote: "This health exploration is complete. Your results have been sent to",
+      completedInbox: "Please check your inbox and spam folder.",
+      required: "Please enter your answer. If you have had no physical discomfort in the past three months, please enter \"None\".",
+      invalidEmail: "Please enter a valid email address.",
+      numberRequired: "Please enter a number, or use \"Not sure how to answer\".",
+      multiRequired: "Please select at least one option, or use \"Not sure how to answer\".",
+      consentRequired: "Please select all three confirmation statements before continuing.",
+      consentUnlock: "I have read the above notice",
+      consentUnlocked: "You may now select the consent items",
+      none: "None",
+      notFilled: "Not answered"
+    },
+    modules: {
+      consent: ["Informed Consent", "Review privacy notice and non-diagnostic nature."],
+      basic: ["Basic Information", "Collect age, height, weight, exercise, and sex."],
+      female: ["Female Health Information", "Questions on menstruation, pregnancy, breastfeeding, Pap smear, and hormone use."],
+      exposure: ["Tobacco and Environmental Exposure", "Record smoking, secondhand smoke, cooking fumes, air pollution, and radiation exposure."],
+      mental: ["Mental Health", "Record recent stress, sleep, and low mood frequency."],
+      diet: ["Dietary Habits", "Collect diet type, common foods, milk, soy products, and probiotics habits."],
+      history: ["Medical and Family History", "Confirm personal cancer history, chronic diseases, and family cancer history."],
+      symptoms: ["Recent Physical Status", "Add recent physical discomfort in the past three months."],
+      contact: ["Contact Information", "Enter the email address for receiving the report."],
+      confirm: ["Data Review", "Please review your answers before submission."],
+      result: ["Completed", "Thank you for your response."]
+    },
+    feedback: {
+      consent: "Informed consent completed. Next, we will organize basic information.",
+      basic: "Basic information completed. Next, we will ask about lifestyle and health status.",
+      female: "Female health information completed. Next, we will ask about tobacco and environmental exposure.",
+      exposure: "Tobacco and environmental exposure completed. Next, we will ask about stress, sleep, and mood.",
+      mental: "Mental health completed. Next, we will ask about dietary habits.",
+      diet: "Dietary habits completed. Next, we will ask about personal and family medical history.",
+      history: "Medical and family history completed. Next, we will ask about recent physical status.",
+      symptoms: "Recent physical status completed. Next, please enter the email address for receiving your report.",
+      contact: "Contact information completed. Finally, please review your answers."
+    },
+    symptom: {
+      "最近三個月：無明顯身體不適": "Past three months: no obvious physical discomfort",
+      "部位": "Area",
+      "狀況": "Symptom",
+      "持續時間": "Duration",
+      "影響程度": "Impact level",
+      "就醫狀態": "Care status",
+      "尚未就醫": "Not yet seen a clinician",
+      "已就醫或已安排檢查": "Seen a clinician or arranged examination",
+      "明顯影響日常": "Clearly affects daily life",
+      "輕微或偶發": "Mild or occasional",
+      "影響程度未明": "Impact level unclear",
+      "頭頸部": "Head or neck",
+      "胸部或呼吸道": "Chest or respiratory tract",
+      "腹部或腸胃": "Abdomen or gastrointestinal tract",
+      "泌尿系統": "Urinary system",
+      "乳房": "Breast",
+      "皮膚或淋巴": "Skin or lymph nodes",
+      "全身狀況": "General condition",
+      "疼痛": "Pain",
+      "腫塊或硬塊": "Lump or hard mass",
+      "出血": "Bleeding",
+      "咳嗽或呼吸不適": "Cough or breathing discomfort",
+      "腸胃不適": "Gastrointestinal discomfort",
+      "體重或食慾改變": "Weight or appetite change",
+      "疲倦或睡眠受影響": "Fatigue or sleep affected"
+    },
+    questions: {
+      consent_acknowledgement: ["Before starting, please confirm that you have read and agree to the following items", "This platform collects basic information, lifestyle habits, health information, and medical history for cancer risk assessment and health management reference. The result is not a medical diagnosis."],
+      birth_year: ["Year of birth", "Please enter a 4-digit year, for example 1980.", "Enter your answer"],
+      height_cm: ["Height (cm)", "Please enter your current height.", "For example, 165"],
+      weight_kg: ["Weight (kg)", "Please enter your current weight.", "For example, 60"],
+      weight_change: ["In the past six months, has your weight increased or decreased significantly (more than 5%)?", "If you are unsure, please select not sure."],
+      exercise_time: ["Weekly exercise time", "Please select the option closest to your usual situation."],
+      sex: ["What is your sex?", "Applicable questions will be shown based on your selection."],
+      menarche_age: ["Age at first menstruation", "If unsure, you may use the not sure option."],
+      menopause_status: ["Current menopause status", "Please select the option closest to your current situation."],
+      first_pregnancy_age: ["Age at first pregnancy", "If you have never been pregnant, select never pregnant."],
+      pregnancy_count: ["How many times have you been pregnant?", "Include miscarriage, induced abortion, and live birth. Enter 0 if never pregnant.", "Must be a number"],
+      live_birth_count: ["Number of live births", "Number of successful deliveries. Enter 0 if never given birth.", "Must be a number"],
+      breastfeeding: ["Have you breastfed after childbirth? If yes, for how long?", "If you have not given birth, select not applicable."],
+      pap_smear: ["Have you ever had a Pap smear? What was the result?", "This is used to organize cervical cancer-related risk factors."],
+      hormone_medication: ["Have you ever used hormone medication?", "Includes contraceptive pills and menopausal hormone replacement therapy (HRT)."],
+      smoking_ever: ["Have you ever had a smoking habit (currently or in the past)?", "Please select the option closest to your situation."],
+      smoking_quit: ["If you have smoked, have you quit?", "If yes to the previous question, please add your current status."],
+      secondhand_smoke: ["Have you been in a long-term secondhand smoke environment at home or work?", "For example, household members, workplace, or regular long-term exposure."],
+      betel_nut: ["Have you ever had a betel nut chewing habit (currently or in the past)?", "This is used for head and neck cancer-related risk factors."],
+      cooking_fume: ["Are you often exposed to cooking fumes at work or in daily life?", "For example, chefs or long-term cooking in the kitchen."],
+      cooking_frequency: ["Average weekly cooking frequency", "If you rarely cook, select less than once."],
+      air_pollution: ["Are you chronically exposed to air pollution at work or in daily life?", "For example, factory areas or heavy traffic areas."],
+      radiation: ["Are you often exposed to radiation at work or in daily life?", "For example, radiology staff."],
+      stress: ["In the past month, how often did you feel tense or anxious each week?", "Please answer based on your general situation in the past month."],
+      sleep_problem: ["In the past month, how often did you sleep poorly or have insomnia each week?", "Please answer based on your general situation in the past month."],
+      low_mood: ["In the past month, how often did you feel low or depressed each week?", "This is only for health risk factor organization and is not a mental health diagnosis."],
+      diet_type: ["What is your current dietary pattern?", "Please select the option closest to your long-term dietary pattern."],
+      frequent_foods: ["Which of the following do you often consume?", "You may select multiple. If none are frequent, select no fixed or small amount."],
+      milk_daily: ["Do you drink milk every day (at least one 240 ml cup, including shelf-stable milk)?", "If you only drink occasionally, select no."],
+      soy_products: ["Do you often consume soy products?", "For example, soy milk, tofu, dried tofu, edamame, at least 3 times per week."],
+      probiotics: ["Do you regularly take probiotics?", "For example, yogurt drinks, yogurt, or probiotic supplements, at least 3 times per week."],
+      personal_cancer: ["Have you ever had cancer (outside this assessment)?", "Please answer based on whether you were previously diagnosed with cancer."],
+      chronic_conditions: ["Do you have any of the following chronic diseases?", "You may select multiple. If none apply, select none of the above."],
+      family_cancer: ["Has any first-degree family member had cancer?", "First-degree relatives include parents, siblings, and children."],
+      family_self_types: ["If yes, what type of cancer did your first-degree family member have?", "You may select multiple."],
+      recent_discomfort: ["Have you had any physical discomfort in the past three months?", "If yes, briefly describe the symptom, duration, and whether you have seen a clinician. If not, enter \"None\".", "For example: bloating and occasional abdominal pain for the past two months; not yet seen a clinician."],
+      email: ["Please enter your email", "The result report will be sent to this email.", "name@example.com"]
+    },
+    options: {
+      "我已閱讀並同意個人資料保護告知事項，同意愛立基生醫股份有限公司依所述目的收集、處理及利用我的個人資料。": "I have read and agree to the personal data protection notice, and consent to EG BioMed Co. Ltd. collecting, processing, and using my personal data for the stated purposes.",
+      "我了解本評估結果的準確度受限於數據庫與演算法，若風險不高不代表沒有風險，若風險較高也不代表已罹病。": "I understand that the accuracy of this assessment is limited by the database and algorithm. A lower risk does not mean no risk, and a higher risk does not mean I have cancer.",
+      "我了解本評估結果僅供個人健康參考，不構成醫療診斷，如有疑慮應諮詢醫師。": "I understand that this result is for personal health reference only and is not a medical diagnosis. If I have concerns, I should consult a physician.",
+      "是": "Yes", "否": "No", "不確定": "Not sure", "不清楚": "Not sure",
+      "男性": "Male", "女性": "Female",
+      "幾乎不運動": "Almost no exercise", "30-60 分鐘": "30-60 minutes", "1-2 小時": "1-2 hours", "多於 2 小時": "More than 2 hours",
+      "12 歲以前（含 12 歲）": "Age 12 or younger", "13 歲以後（含 13 歲）": "Age 13 or older",
+      "尚未停經（月經仍規律來）": "Not menopausal (menstruation still regular)", "已停經（55 歲或以前停經）": "Menopause at age 55 or earlier", "已停經（55 歲或以後停經）": "Menopause after age 55", "已切除子宮或卵巢": "Uterus or ovaries removed",
+      "從未懷孕": "Never pregnant", "20 歲以下": "Age 20 or younger", "20-30 歲": "Age 20-30", "31-35 歲": "Age 31-35", "36 歲以上": "Age 36 or older",
+      "從未哺乳": "Never breastfed", "有哺乳，但少於 6 個月": "Breastfed, less than 6 months", "有哺乳，超過 6 個月（含 6 個月）": "Breastfed, 6 months or longer", "尚未生產，此題不適用": "Not applicable, have not given birth",
+      "是，歷次結果均正常": "Yes, all previous results were normal", "是，曾有異常報告（如 CIN、HPV 陽性等）": "Yes, had an abnormal report (such as CIN or HPV positive)", "否，從未做過": "No, never had one",
+      "是，使用超過 1 年": "Yes, used for more than 1 year", "是，使用不到 1 年": "Yes, used for less than 1 year", "否，從未使用": "No, never used",
+      "是，已戒菸": "Yes, quit smoking", "否，仍在抽菸": "No, still smoking",
+      "少於一次": "Less than once", "每週 1-3 次": "1-3 times per week", "每週 4-6 次": "4-6 times per week", "每週 6 次以上": "6 or more times per week",
+      "不到 1 天": "Less than 1 day", "2-3 天": "2-3 days", "4-5 天": "4-5 days", "幾乎每天": "Almost every day",
+      "葷食（無特別限制）": "Omnivorous diet (no specific restriction)", "全素": "Vegan", "蛋奶素": "Ovo-lacto vegetarian", "蛋素": "Ovo vegetarian", "奶素": "Lacto vegetarian", "植物五辛素": "Vegetarian including five pungent vegetables",
+      "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）": "Mediterranean diet", "彈性蔬食（以植物性食物為主，但偶爾食用肉類、魚類或海鮮）": "Flexitarian diet", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）": "Whole-food plant-based diet", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）": "High fruit/vegetable, low-salt diet", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）": "Ketogenic diet", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）": "Low-carbohydrate diet", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）": "Intermittent fasting",
+      "飲酒（每週至少一次）": "Alcohol (at least once per week)", "燒烤或油炸食品": "Grilled or fried foods", "紅肉（牛、羊、豬等）": "Red meat (beef, lamb, pork, etc.)", "醃漬類食品（泡菜、鹹魚等）": "Pickled foods", "甜食或高糖零食": "Sweets or high-sugar snacks", "含糖飲料": "Sugary drinks", "高脂肪食物（速食、肥肉等）": "High-fat foods", "乳製品（起司、優格等）": "Dairy products", "蔬菜水果（每日攝取）": "Vegetables and fruits (daily)", "咖啡（每週至少 3 次）": "Coffee (at least 3 times per week)", "茶（每週至少 3 次）": "Tea (at least 3 times per week)", "素食（以蔬食為主）": "Vegetarian or mostly plant-based", "無固定或少量": "No fixed pattern or small amount",
+      "是，每天飲用": "Yes, daily", "否，偶爾或不飲用": "No, occasional or none", "是，每週 3 次以上": "Yes, at least 3 times per week", "否，較少食用": "No, rarely", "否，較少補充": "No, rarely",
+      "是，曾罹癌": "Yes, had cancer",
+      "高血壓": "Hypertension", "糖尿病／高血糖": "Diabetes / high blood glucose", "高血脂／高膽固醇": "Hyperlipidemia / high cholesterol", "肝病（B 型肝炎／C 型肝炎／肝硬化）": "Liver disease (HBV / HCV / cirrhosis)", "胃食道逆流": "Gastroesophageal reflux disease", "心臟病／心律不整": "Heart disease / arrhythmia", "甲狀腺疾病": "Thyroid disease", "氣喘／慢性肺阻塞（COPD）": "Asthma / COPD", "痛風／高尿酸": "Gout / high uric acid", "關節炎（含類風濕性）": "Arthritis (including rheumatoid arthritis)", "憂鬱症／焦慮症": "Depression / anxiety", "中風病史": "History of stroke", "腎臟病／洗腎": "Kidney disease / dialysis", "自體免疫疾病（乾燥症、紅斑性狼瘡等）": "Autoimmune disease", "以上皆無": "None of the above", "其他慢性疾病": "Other chronic disease",
+      "乳癌": "Breast cancer", "攝護腺癌": "Prostate cancer", "肺癌": "Lung cancer", "頭頸癌": "Head and neck cancer", "胰臟癌": "Pancreatic cancer", "肝癌": "Liver cancer", "大腸直腸癌": "Colorectal cancer", "胃癌": "Stomach cancer", "子宮內膜癌": "Endometrial cancer", "膀胱癌": "Bladder cancer", "腎癌": "Kidney cancer", "其他癌種": "Other cancer type"
+    }
+  }
+};
+
+const optimizedFeatureColumns = [
+  "record_id", "sex", "age", "height_cm", "weight_kg", "bmi", "diagnosis", "is_cancer_patient",
+  "prev_cancer", "family_cancer_history", "first_degree_relative_cancer", "chronic_hypertension",
+  "chronic_diabetes", "chronic_hyperlipidemia", "chronic_liver_disease", "chronic_gerd",
+  "chronic_heart_disease", "chronic_thyroid", "chronic_asthma_copd", "chronic_gout",
+  "chronic_arthritis", "chronic_mental", "chronic_stroke", "chronic_kidney", "chronic_autoimmune",
+  "chronic_other_unclassified", "chronic_disease_count", "smoking", "quit_smoking",
+  "secondhand_smoke", "betel_nut", "radiation_exposure", "cooking_fumes", "air_pollution",
+  "cooking_freq_missing", "cooking_freq_per_week", "weight_change_6m", "exercise_per_week",
+  "anxiety_freq_missing", "anxiety_freq", "insomnia_freq_missing", "insomnia_freq",
+  "depression_freq_missing", "depression_freq", "alcohol", "vegetarian", "grilled_fried_food",
+  "pickled_food", "red_meat", "sweets_junk", "sugary_drinks", "vegetables_fruits",
+  "high_fat_food_missing", "high_fat_food", "dairy_missing", "dairy", "coffee_habit_missing",
+  "tea_habit_missing", "coffee_habit", "tea_habit", "menarche_early", "menopause_ordinal",
+  "first_pregnancy_age_ordinal", "num_pregnancies", "num_births", "breastfed", "pap_smear_done",
+  "pap_smear_abnormal", "hormone_drug", "score", "data_source"
+];
+
+const answers = {};
+let currentIndex = 0;
+let activeMode = "quick";
+let multiSelection = new Set();
+let moduleFeedback = "";
+let llmDraft = null;
+let consentNoticeRead = false;
+const savedLang = localStorage.getItem("egbiomed_lang");
+let currentLang = savedLang || ((navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en");
+
+const startBtn = document.querySelector("#startBtn");
+const assessment = document.querySelector("#assessment");
+const moduleList = document.querySelector("#moduleList");
+const sectionTitle = document.querySelector("#sectionTitle");
+const sectionSummary = document.querySelector("#sectionSummary");
+const guideMessage = document.querySelector("#guideMessage");
+const questionArea = document.querySelector("#questionArea");
+const quickOptions = document.querySelector("#quickOptions");
+const freeAnswer = document.querySelector("#freeAnswer");
+const voiceAnswer = document.querySelector("#voiceAnswer");
+const freeText = document.querySelector("#freeText");
+const parseCard = document.querySelector("#parseCard");
+const backBtn = document.querySelector("#backBtn");
+const skipBtn = document.querySelector("#skipBtn");
+const parseTextBtn = document.querySelector("#parseTextBtn");
+const voiceBtn = document.querySelector("#voiceBtn");
+const inputZone = document.querySelector("#inputZone");
+const panelFooter = document.querySelector(".panel-footer");
+const guideStage = document.querySelector("#guideStage");
+const languageButtons = document.querySelectorAll(".language-switcher__button");
+
+const zhUi = {
+  guideIntro: "接下來我會用幾個簡單問題，幫你整理和癌症風險相關的生活習慣、家族史與身體狀況。近期身體狀況可用文字回答，語音回答（建立中）。",
+  guideDefault: "已完成前一題。請依照最接近日常狀況的答案填寫。",
+  progress: "健康探索進度",
+  questionCount: "第",
+  of: "題 / 共",
+  voice: "語音回答（建立中）",
+  saveContinue: "儲存並繼續",
+  consentUnlock: "我已閱讀上述告知事項",
+  consentUnlocked: "已可勾選同意事項",
+  submitReview: "確認並送出",
+  notFilled: "未填寫"
+};
+
+function ui(key) {
+  return currentLang === "en" ? i18n.en.ui[key] || key : zhUi[key] || key;
+}
+
+function tx(value) {
+  if (currentLang !== "en") return value;
+  return i18n.en.options[value] || i18n.en.symptom[value] || value;
+}
+
+function getModuleCopy(module) {
+  if (currentLang !== "en") return [module.title, module.summary];
+  return i18n.en.modules[module.id] || [module.title, module.summary];
+}
+
+function getQuestionCopy(question) {
+  if (currentLang !== "en") return {
+    title: question.title,
+    note: question.note,
+    placeholder: question.placeholder
+  };
+  const copy = i18n.en.questions[question.id] || [];
+  return {
+    title: copy[0] || question.title,
+    note: copy[1] || question.note,
+    placeholder: copy[2] || question.placeholder
+  };
+}
+
+function formatDisplayValue(value) {
+  if (Array.isArray(value)) return value.map((item) => tx(item)).join(currentLang === "en" ? ", " : "、");
+  return value ? tx(value) : ui("notFilled");
+}
+
+function getEntryDisplayLabel(entry) {
+  const question = questions.find((item) => item.id === entry.question_id);
+  return question ? getQuestionCopy(question).title : currentLang === "en" ? entry.display_label || entry.label : entry.label;
+}
+
+function applyStaticText() {
+  document.documentElement.lang = currentLang === "en" ? "en" : "zh-Hant";
+  document.title = currentLang === "en" ? i18n.en.ui.appTitle : "AI 癌症風險互動評估";
+  document.querySelector("#hero-title").textContent = currentLang === "en" ? i18n.en.ui.heroTitle : "AI 癌症風險互動評估";
+  document.querySelector(".hero__subtitle").textContent = currentLang === "en" ? i18n.en.ui.heroSubtitle : "透過 5-8 分鐘的互動問答，了解與你相關的癌症風險因子組合。";
+  const trustItems = document.querySelectorAll(".trust-strip span");
+  const trustCopy = currentLang === "en" ? [i18n.en.ui.trust1, i18n.en.ui.trust2, i18n.en.ui.trust3] : ["非醫療診斷", "資料確認後才送出", "完成後取得個人化摘要"];
+  trustItems.forEach((item, index) => { item.textContent = trustCopy[index]; });
+  startBtn.textContent = currentLang === "en" ? i18n.en.ui.start : "開始互動評估";
+  document.querySelector(".disclaimer").textContent = currentLang === "en" ? i18n.en.ui.disclaimer : "本結果僅供健康教育與自我健康管理參考，不構成醫療診斷、疾病篩檢結果或治療建議。";
+  document.querySelector(".progress-panel .eyebrow").textContent = currentLang === "en" ? i18n.en.ui.currentSection : "目前章節";
+  document.querySelector('[data-mode="quick"]').textContent = currentLang === "en" ? i18n.en.ui.quick : "快速選項";
+  document.querySelector('[data-mode="text"]').textContent = currentLang === "en" ? i18n.en.ui.text : "文字回答";
+  document.querySelector('[data-mode="voice"]').textContent = currentLang === "en" ? i18n.en.ui.voice : "語音回答（建立中）";
+  voiceBtn.lastChild.textContent = currentLang === "en" ? i18n.en.ui.voice : "語音回答（建立中）";
+  document.querySelector(".voice-answer p").textContent = currentLang === "en" ? i18n.en.ui.voiceUnavailable : "語音回答功能（建立中），請先使用文字回答。";
+  backBtn.textContent = currentLang === "en" ? i18n.en.ui.back : "上一題";
+  skipBtn.textContent = currentLang === "en" ? i18n.en.ui.uncertain : "不確定怎麼回答";
+  document.querySelector(".guide-stage__chip--one").textContent = currentLang === "en" ? i18n.en.ui.lifestyle : "生活習慣";
+  document.querySelector(".guide-stage__chip--two").textContent = currentLang === "en" ? i18n.en.ui.familyHistory : "家族史";
+  document.querySelector(".guide-stage__chip--three").textContent = currentLang === "en" ? i18n.en.ui.bodyStatus : "身體狀況";
+  document.querySelector(".guide-stage__status").lastChild.textContent = currentLang === "en" ? i18n.en.ui.guideStatus : "陪伴・理解・支持";
+  languageButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.lang === currentLang));
+}
+
+function getAnswerValue(answerStore, field) {
+  return answerStore[field]?.value;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[character]));
+}
+
+function getActiveQuestions() {
+  return questions.filter((question) => !question.appliesIf || question.appliesIf(answers));
+}
+
+function getCurrentQuestion() {
+  return getActiveQuestions()[currentIndex];
+}
+
+function formatValue(value) {
+  if (Array.isArray(value)) return value.join("、");
+  return value ?? "未填寫";
+}
+
+function normalizeNumber(value) {
+  const number = Number(String(value ?? "").replace(/[^\d.]/g, ""));
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeSingleChoice(value) {
+  if (value == null || value === "") return { value: null, missing: true };
+  const text = String(value);
+  const yesNoMap = {
+    是: 1,
+    否: 0,
+    不清楚: null,
+    不確定: null
+  };
+  if (Object.prototype.hasOwnProperty.call(yesNoMap, text)) {
+    return { value: yesNoMap[text], label: text, missing: yesNoMap[text] === null };
+  }
+  return { value: text, label: text, missing: false };
+}
+
+function encodeMultiChoice(value, options = []) {
+  const selected = Array.isArray(value) ? value : value ? [value] : [];
+  return {
+    selected,
+    encoded: options.reduce((acc, option) => {
+      acc[option] = selected.includes(option) ? 1 : 0;
+      return acc;
+    }, {}),
+    missing: selected.length === 0
+  };
+}
+
+function getQuestionByField(field) {
+  return questions.find((question) => question.field === field);
+}
+
+function detectDuration(text) {
+  const durationMatch = text.match(/(一|二|兩|三|四|五|六|七|八|九|十|\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s*(天|週|周|個月|月|年|day|days|week|weeks|month|months|year|years)/i);
+  return durationMatch ? durationMatch[0] : "";
+}
+
+function parseSymptomText(text) {
+  const normalized = text.trim();
+  const noSymptom = /^(無|沒有|無不適|沒有不舒服|目前沒有|none|no|no symptoms|no discomfort)$/iu.test(normalized);
+  const bodyPartMap = [
+    ["頭頸部", /頭|喉|喉嚨|脖|頸|口腔|牙齦|head|neck|throat|mouth|gum/i],
+    ["胸部或呼吸道", /胸|咳|喘|呼吸|痰|肺|chest|cough|breath|breathing|lung|phlegm/i],
+    ["腹部或腸胃", /胃|腹|肚|腸|便|排便|脹|噁心|嘔吐|stomach|abdomen|abdominal|bowel|bloating|nausea|vomit|diarrhea|constipation/i],
+    ["泌尿系統", /尿|膀胱|腎|血尿|urine|urinary|bladder|kidney/i],
+    ["乳房", /乳|胸部硬塊|breast/i],
+    ["皮膚或淋巴", /皮膚|痣|淋巴|腫塊|硬塊|skin|mole|lymph|lump|mass/i],
+    ["全身狀況", /體重|疲倦|發燒|夜汗|食慾|weight|fatigue|fever|night sweat|appetite/i]
+  ];
+  const symptomMap = [
+    ["疼痛", /痛|疼|刺痛|悶痛|pain|ache|sore/i],
+    ["腫塊或硬塊", /腫塊|硬塊|摸到|lump|mass|hard/i],
+    ["出血", /血|出血|血便|血尿|blood|bleeding/i],
+    ["咳嗽或呼吸不適", /咳|喘|呼吸|cough|breath|breathing|wheez/i],
+    ["腸胃不適", /脹|腹瀉|便秘|噁心|嘔吐|胃酸|bloating|diarrhea|constipation|nausea|vomit|reflux/i],
+    ["體重或食慾改變", /體重|變瘦|變胖|食慾|weight|appetite/i],
+    ["疲倦或睡眠受影響", /疲倦|累|睡|fatigue|tired|sleep/i]
+  ];
+  const bodyParts = bodyPartMap.filter(([, pattern]) => pattern.test(normalized)).map(([label]) => label);
+  const symptoms = symptomMap.filter(([, pattern]) => pattern.test(normalized)).map(([label]) => label);
+  const duration = detectDuration(normalized);
+  const careSeeking = /未就醫|沒看醫生|尚未就醫|沒有就醫|not yet|have not seen|haven't seen|no doctor|not seen/i.test(normalized)
+      ? "尚未就醫"
+      : /就醫|看醫生|看診|檢查|門診|急診|doctor|clinic|exam|examination|checked|hospital/i.test(normalized)
+        ? "已就醫或已安排檢查"
+        : "";
+  const severity = /嚴重|很痛|劇痛|影響生活|睡不著|severe|very painful|affect.*daily|cannot sleep/i.test(normalized)
+      ? "明顯影響日常"
+    : /偶爾|輕微|一點|occasional|mild|slight/i.test(normalized)
+      ? "輕微或偶發"
+      : "";
+  const missing = [];
+  if (!noSymptom && !duration) missing.push("持續多久");
+  if (!noSymptom && !careSeeking) missing.push("是否已就醫或檢查");
+  if (!noSymptom && bodyParts.length === 0 && symptoms.length === 0) missing.push("主要不適內容");
+  const followUp = noSymptom
+    ? "了解，目前先記錄為最近三個月無明顯身體不適。"
+    : missing.length > 0
+      ? `我想再確認${missing.join("、")}，可以補充一句嗎？`
+      : "我已整理好這段身體狀況補充，接下來可以進行聯絡資料填寫。";
+
+  return {
+    raw_text: normalized,
+    no_symptom: noSymptom,
+    body_parts: bodyParts,
+    symptoms,
+    duration,
+    severity,
+    care_seeking: careSeeking,
+    missing,
+    follow_up: followUp,
+    ready_to_close: noSymptom || missing.length === 0
+  };
+}
+
+function translateFollowUp(parsed) {
+  if (parsed.no_symptom) return "Thank you. I have recorded that you have had no obvious physical discomfort in the past three months.";
+  if (!parsed.body_parts.length && !parsed.symptoms.length) return "Could you add the main area of discomfort and what it feels like?";
+  if (!parsed.duration) return "Could you add approximately how long this has lasted?";
+  if (!parsed.care_seeking) return "I would like to confirm whether you have already seen a clinician or had any examination. Could you add one sentence?";
+  return "I have enough information for this section. You can save and continue.";
+}
+
+function getCurrentModuleIndex() {
+  const question = getCurrentQuestion();
+  if (!question) return modules.findIndex((item) => item.id === "confirm");
+  return modules.findIndex((item) => item.id === question.module);
+}
+
+function getModuleFeedback(fromModuleId, toModuleId) {
+  const feedback = {
+    consent: "已完成知情同意確認。接下來會整理基本資料。",
+    basic: "已完成基本資料。接下來會詢問與生活及健康狀況相關的問題。",
+    female: "已完成女性相關資訊。接下來會詢問菸草與環境暴露。",
+    exposure: "已完成菸草與環境暴露評估。接下來會詢問近期壓力、睡眠與情緒狀況。",
+    mental: "已完成心理健康評估。接下來會詢問飲食習慣。",
+    diet: "已完成飲食習慣評估。接下來會詢問個人病史與家族史。",
+    history: "已完成病史與家族史評估。接下來會補充最近三個月的身體狀況。",
+    symptoms: "已完成近期身體狀況補充。接下來請填寫接收報告的 Email。",
+    contact: "已完成聯絡資料。最後請確認本次填答內容。"
+  };
+  if (!fromModuleId || fromModuleId === toModuleId) return "";
+  return currentLang === "en" ? i18n.en.feedback[fromModuleId] || "" : feedback[fromModuleId] || "";
+}
+
+function renderConsentNotice() {
+  if (currentLang === "en") {
+    return `
+      <section class="consent-notice" aria-labelledby="consentNoticeTitle">
+        <div class="consent-notice__section">
+          <h3 id="consentNoticeTitle">Personal Data Protection Notice</h3>
+          <dl>
+            <div><dt>Collector</dt><dd>EG BioMed Co. Ltd.</dd></div>
+            <div><dt>Purpose</dt><dd>AI cancer risk assessment research, personalized risk report generation, and model training validation</dd></div>
+            <div><dt>Data categories</dt><dd>Basic information (age, sex, height, weight), health information (medical history, family history, lifestyle habits, clinical symptoms), and email</dd></div>
+            <div><dt>Storage</dt><dd>Microsoft cloud servers in the United States, compliant with GDPR and SOC 2 Type II security standards</dd></div>
+            <div><dt>Retention</dt><dd>5 years from the date of completion, then destroyed or de-identified</dd></div>
+            <div><dt>Users</dt><dd>Our research team. Data will not be sold or provided to third parties for commercial purposes.</dd></div>
+            <div><dt>Transfer</dt><dd>Your data will be stored and processed on Microsoft servers in the United States.</dd></div>
+            <div><dt>Rights</dt><dd>To access, correct, or delete your personal data, contact service@eg-bio.com (response time: 15 business days).</dd></div>
+          </dl>
+        </div>
+        <div class="consent-notice__section consent-notice__section--warning">
+          <h3>Accuracy Notice and Honest Response Requirement</h3>
+          <p>AI model performance on the training validation set: overall cancer risk identification AUC = 0.966, sensitivity 98.1%; cancer-specific model AUC ranges from 0.876 to 1.000.</p>
+          <p><strong>Important:</strong> The accuracy of this assessment depends heavily on honest answers. If you provide false, careless, omitted, or exaggerated symptoms or medical history, the AI model may be unable to generate a valid risk assessment. The company is not responsible for assessment deviations caused by inaccurate responses. Even with honest answers, statistical models still have a range of prediction error (false positives and false negatives). This result is not a medical diagnosis and cannot replace professional clinical judgment.</p>
+        </div>
+        <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">${i18n.en.ui.consentUnlock}</button>
+      </section>
+    `;
+  }
+  return `
+    <section class="consent-notice" aria-labelledby="consentNoticeTitle">
+      <div class="consent-notice__section">
+        <h3 id="consentNoticeTitle">個人資料保護告知事項</h3>
+        <dl>
+          <div><dt>收集機構</dt><dd>愛立基生醫股份有限公司（EG BioMed Co. Ltd.）</dd></div>
+          <div><dt>收集目的</dt><dd>AI 癌症風險評估研究、個人化風險報告產製及模型訓練驗證</dd></div>
+          <div><dt>個資類別</dt><dd>基本資料（年齡、性別、身高體重）、健康資訊（病史、家族史、生活習慣、臨床症狀）、Email</dd></div>
+          <div><dt>儲存位置</dt><dd>Microsoft 雲端伺服器（美國），符合 GDPR 及 SOC 2 Type II 安全標準</dd></div>
+          <div><dt>保存期限</dt><dd>自填寫日起 5 年，期滿後銷毀或去識別化處理</dd></div>
+          <div><dt>利用對象</dt><dd>本公司研究團隊，不對外販售或提供予第三方商業用途</dd></div>
+          <div><dt>跨境傳輸</dt><dd>您的資料將儲存於 Microsoft 美國伺服器進行處理</dd></div>
+          <div><dt>個資權利</dt><dd>如需查閱、更正或刪除您的個人資料，請聯繫：service@eg-bio.com（回覆時限：15 個工作日）</dd></div>
+        </dl>
+      </div>
+      <div class="consent-notice__section consent-notice__section--warning">
+        <h3>準確度說明與誠實填答要求</h3>
+        <p>本平台 AI 模型效能（訓練驗證集）：整體癌症風險辨識 AUC = 0.966、敏感度 98.1% - 各癌種個別模型 AUC 介於 0.876 至 1.000</p>
+        <p><strong>重要：</strong>本評估結果的準確度高度依賴您的誠實填答。若您填寫不實、隨意作答、故意省略或誇大任何症狀及病史，AI 模型將因輸入資料失真而無法產生有效的風險評估。本公司對因不實填答所導致之評估結果偏差，不負任何責任。即便誠實填答，統計模型仍存在一定範圍之預測誤差（假陽性與假陰性），本結果不構成醫療診斷，不能取代臨床醫師之專業判斷。</p>
+      </div>
+      <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">我已閱讀上述告知事項</button>
+    </section>
+  `;
+}
+
+function renderModules() {
+  const activeModuleIndex = getCurrentModuleIndex();
+  moduleList.innerHTML = modules.map((module, index) => {
+    const state = index < activeModuleIndex ? "is-done" : index === activeModuleIndex ? "is-active" : "";
+    const [moduleTitle] = getModuleCopy(module);
+    return `
+      <li class="${state}">
+        <span class="module-index">${index < activeModuleIndex ? "✓" : index + 1}</span>
+        <span>${moduleTitle}</span>
+      </li>
+    `;
+  }).join("");
+
+  const activeModule = modules[activeModuleIndex] || modules.at(-1);
+  const [title, summary] = getModuleCopy(activeModule);
+  sectionTitle.textContent = title;
+  sectionSummary.textContent = summary;
+}
+
+function renderQuestion() {
+  const question = getCurrentQuestion();
+  parseCard.hidden = true;
+  multiSelection = new Set();
+
+  if (!question) {
+    renderConfirmation();
+    return;
+  }
+
+  renderModules();
+  inputZone.hidden = false;
+  panelFooter.hidden = false;
+  skipBtn.hidden = !question.required || question.id === "consent_acknowledgement";
+  skipBtn.disabled = question.id === "consent_acknowledgement";
+  guideMessage.textContent = currentIndex === 0 ? ui("guideIntro") : ui("guideDefault");
+
+  const activeQuestions = getActiveQuestions();
+  const progress = Math.round(((currentIndex + 1) / activeQuestions.length) * 100);
+  const questionCopy = getQuestionCopy(question);
+  questionArea.innerHTML = `
+    <div class="exploration-progress" aria-label="${currentLang === "en" ? ui("progress") : "健康探索進度"} ${progress}%">
+      <div class="exploration-progress__track">
+        <span class="exploration-progress__bar" style="--progress:${progress}%"></span>
+      </div>
+    </div>
+    ${moduleFeedback ? `<p class="module-feedback">${moduleFeedback}</p>` : ""}
+    <p class="question-meta">${currentLang === "en" ? `${ui("questionCount")} ${currentIndex + 1} ${ui("of")} ${activeQuestions.length}` : `第 ${currentIndex + 1} 題 / 共 ${activeQuestions.length} 題`}</p>
+    <h2 class="question-title">${questionCopy.title}${question.required ? '<span class="required-mark"> *</span>' : ""}</h2>
+    <p class="question-note">${questionCopy.note}</p>
+    ${question.id === "consent_acknowledgement" ? renderConsentNotice() : ""}
+  `;
+  moduleFeedback = "";
+
+  configureAnswerModes(question);
+  renderQuickInput(question);
+  setupConsentGate(question);
+  freeText.value = "";
+  backBtn.disabled = currentIndex === 0;
+}
+
+function setupConsentGate(question) {
+  if (question.id !== "consent_acknowledgement") return;
+  const unlockButton = document.querySelector("#unlockConsentBtn");
+  const updateConsentControls = () => {
+    document.querySelectorAll(".option-button").forEach((button) => {
+      button.disabled = !consentNoticeRead;
+      button.classList.toggle("is-disabled", !consentNoticeRead);
+    });
+    const saveButton = document.querySelector("#saveMultiBtn");
+    if (saveButton) saveButton.disabled = !consentNoticeRead;
+    if (unlockButton) {
+      unlockButton.disabled = consentNoticeRead;
+      unlockButton.textContent = consentNoticeRead ? ui("consentUnlocked") : ui("consentUnlock");
+    }
+  };
+  updateConsentControls();
+  unlockButton?.addEventListener("click", () => {
+    consentNoticeRead = true;
+    updateConsentControls();
+  });
+}
+
+function configureAnswerModes(question) {
+  const modeTabs = document.querySelector(".mode-tabs");
+  const quickTab = document.querySelector('[data-mode="quick"]');
+  const textTab = document.querySelector('[data-mode="text"]');
+  const voiceTab = document.querySelector('[data-mode="voice"]');
+  const textAvailable = question.type === "text";
+
+  modeTabs.hidden = !textAvailable;
+  quickTab.hidden = textAvailable;
+  textTab.hidden = !textAvailable;
+  voiceTab.hidden = !textAvailable;
+  voiceTab.textContent = currentLang === "en" ? ui("voice") : "語音回答（建立中）";
+
+  activeMode = textAvailable ? "text" : "quick";
+  document.querySelectorAll(".mode-tab").forEach((item) => {
+    item.classList.toggle("is-active", item.dataset.mode === activeMode);
+  });
+
+  quickOptions.hidden = textAvailable;
+  freeAnswer.hidden = !textAvailable;
+  voiceAnswer.hidden = true;
+  parseTextBtn.textContent = currentLang === "en" ? ui("saveContinue") : "儲存並繼續";
+}
+
+function renderLlmPanel(parsed) {
+  if (!parsed || !parsed.raw_text) {
+    parseCard.innerHTML = `
+      <div class="llm-chat">
+        <div class="llm-chat-row llm-chat-row--guide">
+          <div class="llm-chat-avatar" aria-hidden="true">
+            <img src="assets/ai-health-guide-character.png" alt="" />
+          </div>
+          <div class="llm-chat-bubble">
+            <p class="eyebrow">AI Health Guide</p>
+            <p>${currentLang === "en" ? i18n.en.ui.aiTypePrompt : "你輸入後，我會即時整理身體不適的重點，必要時再提出一個追問。"}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    parseCard.hidden = false;
+    return;
+  }
+
+  const joiner = currentLang === "en" ? ", " : "、";
+  const fieldLabel = (label) => currentLang === "en" ? i18n.en.symptom[label] || label : label;
+  const summaryItems = parsed.no_symptom
+    ? [tx("最近三個月：無明顯身體不適")]
+    : [
+      parsed.body_parts.length ? `${fieldLabel("部位")}：${parsed.body_parts.map(tx).join(joiner)}` : "",
+      parsed.symptoms.length ? `${fieldLabel("狀況")}：${parsed.symptoms.map(tx).join(joiner)}` : "",
+      parsed.duration ? `${fieldLabel("持續時間")}：${parsed.duration}` : "",
+      parsed.severity ? `${fieldLabel("影響程度")}：${tx(parsed.severity)}` : "",
+      parsed.care_seeking ? `${fieldLabel("就醫狀態")}：${tx(parsed.care_seeking)}` : ""
+    ].filter(Boolean);
+
+  parseCard.innerHTML = `
+    <div class="llm-chat">
+      <div class="llm-chat-row llm-chat-row--user">
+        <div class="llm-chat-bubble llm-chat-bubble--user">${escapeHtml(parsed.raw_text)}</div>
+      </div>
+      <div class="llm-chat-row llm-chat-row--guide">
+        <div class="llm-chat-avatar" aria-hidden="true">
+          <img src="assets/ai-health-guide-character.png" alt="" />
+        </div>
+        <div class="llm-chat-bubble">
+          <p class="eyebrow">AI Health Guide</p>
+          <h3>${parsed.ready_to_close ? (currentLang === "en" ? i18n.en.ui.aiSummaryReady : "我先幫你整理好了") : (currentLang === "en" ? i18n.en.ui.aiSummaryDraft : "我先幫你整理目前資訊")}</h3>
+          <ul class="llm-summary-list">
+            ${summaryItems.length ? summaryItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("") : `<li>${currentLang === "en" ? i18n.en.ui.aiShortText : "目前文字較簡短，尚需要補充主要不適內容。"}</li>`}
+          </ul>
+        </div>
+      </div>
+      <div class="llm-chat-row llm-chat-row--guide">
+        <div class="llm-chat-avatar llm-chat-avatar--small" aria-hidden="true">
+          <img src="assets/ai-health-guide-character.png" alt="" />
+        </div>
+        <div class="llm-chat-bubble llm-chat-bubble--follow">${escapeHtml(currentLang === "en" ? translateFollowUp(parsed) : parsed.follow_up)}</div>
+      </div>
+      <p class="helper-text">${currentLang === "en" ? i18n.en.ui.aiDisclaimer : "這只是協助整理你輸入的內容，不代表醫療診斷。"}</p>
+    </div>
+  `;
+  parseCard.hidden = false;
+}
+
+function renderQuickInput(question) {
+  quickOptions.innerHTML = "";
+  const questionCopy = getQuestionCopy(question);
+
+  if (question.type === "email") {
+    quickOptions.innerHTML = `
+      <div class="number-entry">
+        <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="${questionCopy.placeholder || "name@example.com"}" />
+        <button class="secondary-action" id="saveEmailBtn" type="button">${ui("saveContinue")}</button>
+      </div>
+    `;
+    document.querySelector("#saveEmailBtn").addEventListener("click", () => {
+      const value = document.querySelector("#emailInput").value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        showInlineNotice(currentLang === "en" ? i18n.en.ui.invalidEmail : "請輸入有效的 Email。");
+        return;
+      }
+      saveAnswer(value, "email_input");
+    });
+    return;
+  }
+
+  if (question.type === "text") {
+    freeText.placeholder = questionCopy.placeholder || (currentLang === "en" ? "Please enter your answer" : "請輸入您的回答");
+    llmDraft = null;
+    renderLlmPanel(null);
+    return;
+  }
+
+  if (question.type === "number") {
+    quickOptions.innerHTML = `
+      <div class="number-entry">
+        <input id="numberInput" type="number" inputmode="numeric" placeholder="${questionCopy.placeholder || (currentLang === "en" ? "Enter a number" : "輸入數字")}" />
+        <button class="secondary-action" id="saveNumberBtn" type="button">${ui("saveContinue")}</button>
+      </div>
+    `;
+    document.querySelector("#saveNumberBtn").addEventListener("click", () => {
+      const value = document.querySelector("#numberInput").value.trim();
+      if (!value) {
+        showInlineNotice(currentLang === "en" ? i18n.en.ui.numberRequired : "請先輸入數字，或使用「不確定怎麼回答」。");
+        return;
+      }
+      saveAnswer(value, "number_input");
+    });
+    return;
+  }
+
+  if (question.type === "multi") {
+    quickOptions.innerHTML = `
+      <div class="multi-options">
+        ${question.options.map((option) => `
+          <button class="option-button option-button--multi" type="button" data-value="${option}" aria-pressed="false">${tx(option)}</button>
+        `).join("")}
+      </div>
+      <button class="secondary-action" id="saveMultiBtn" type="button">${ui("saveContinue")}</button>
+    `;
+
+    quickOptions.querySelectorAll(".option-button--multi").forEach((button) => {
+      button.addEventListener("click", () => {
+        const value = button.dataset.value;
+        if (multiSelection.has(value)) {
+          multiSelection.delete(value);
+        } else {
+          multiSelection.add(value);
+        }
+        button.classList.toggle("is-selected", multiSelection.has(value));
+        button.setAttribute("aria-pressed", String(multiSelection.has(value)));
+      });
+    });
+
+    document.querySelector("#saveMultiBtn").addEventListener("click", () => {
+      const selected = [...multiSelection];
+      const minSelected = question.minSelected || 1;
+      if (selected.length < minSelected) {
+        showInlineNotice(question.minSelected
+          ? (currentLang === "en" ? i18n.en.ui.consentRequired : "請完整勾選三項確認聲明後再繼續。")
+          : (currentLang === "en" ? i18n.en.ui.multiRequired : "請至少選擇一項，或使用「不確定怎麼回答」。"));
+        return;
+      }
+      saveAnswer(selected, "multi_choice");
+    });
+    return;
+  }
+
+  quickOptions.innerHTML = question.options.map((option) => `
+    <button class="option-button" type="button" data-value="${option}">${tx(option)}</button>
+  `).join("");
+
+  quickOptions.querySelectorAll(".option-button").forEach((button) => {
+    button.addEventListener("click", () => saveAnswer(button.dataset.value, "single_choice"));
+  });
+}
+
+function showInlineNotice(message) {
+  parseCard.innerHTML = `<p class="helper-text">${message}</p>`;
+  parseCard.hidden = false;
+}
+
+function saveAnswer(value, source, structured = null) {
+  const question = getCurrentQuestion();
+  const fromModuleId = question.module;
+  const questionCopy = getQuestionCopy(question);
+  const entry = {
+    question_id: question.id,
+    label: question.title,
+    display_label: questionCopy.title,
+    value,
+    source,
+    confirmed: true
+  };
+  if (structured) entry.structured = structured;
+  answers[question.field] = entry;
+  currentIndex += 1;
+  const nextQuestion = getCurrentQuestion();
+  moduleFeedback = getModuleFeedback(fromModuleId, nextQuestion?.module || "confirm");
+  renderQuestion();
+}
+
+function renderConfirmation() {
+  const moduleIndex = modules.findIndex((item) => item.id === "confirm");
+  moduleList.innerHTML = modules.map((module, index) => `
+    <li class="${index < moduleIndex ? "is-done" : index === moduleIndex ? "is-active" : ""}">
+      <span class="module-index">${index < moduleIndex ? "✓" : index + 1}</span>
+      <span>${getModuleCopy(module)[0]}</span>
+    </li>
+  `).join("");
+  sectionTitle.textContent = currentLang === "en" ? i18n.en.ui.confirmSection : "資料確認";
+  sectionSummary.textContent = currentLang === "en" ? i18n.en.ui.confirmSummary : "請確認以下填答內容是否正確。";
+  guideMessage.textContent = currentLang === "en" ? i18n.en.ui.confirmGuide : "以下是您本次填寫的題目與答案。請確認內容無誤後送出。";
+
+  questionArea.innerHTML = `
+    <div class="confirm-panel">
+      ${moduleFeedback ? `<p class="module-feedback">${moduleFeedback}</p>` : ""}
+      <h2 class="question-title">${currentLang === "en" ? i18n.en.ui.confirmTitle : "請確認您的填答內容"}</h2>
+      <div class="answer-review-list">
+        ${Object.values(answers).map((entry) => `
+          <div class="answer-review-item">
+            <b>${getEntryDisplayLabel(entry)}</b>
+            <span>${formatDisplayValue(entry.value)}</span>
+          </div>
+        `).join("")}
+      </div>
+      <div class="result-actions">
+        <button class="secondary-action" id="runModelBtn" type="button">${currentLang === "en" ? i18n.en.ui.submitReview : "確認並送出"}</button>
+      </div>
+    </div>
+  `;
+  moduleFeedback = "";
+  inputZone.hidden = true;
+  parseCard.hidden = true;
+  backBtn.disabled = false;
+  skipBtn.hidden = true;
+  document.querySelector("#runModelBtn").addEventListener("click", renderResult);
+}
+
+function calculateBmi() {
+  const height = Number(getAnswerValue(answers, "demographics.height_cm"));
+  const weight = Number(getAnswerValue(answers, "demographics.weight_kg"));
+  if (height > 0 && weight > 0) {
+    return Number((weight / ((height / 100) ** 2)).toFixed(1));
+  }
+  return "";
+}
+
+function calculateAge() {
+  const birthYear = normalizeNumber(getAnswerValue(answers, "demographics.birth_year"));
+  if (!birthYear) return "";
+  return new Date().getFullYear() - birthYear;
+}
+
+function boolFromYesNo(value) {
+  if (value === "是" || String(value || "").startsWith("是，")) return 1;
+  if (value === "否" || String(value || "").startsWith("否，")) return 0;
+  return 0;
+}
+
+function hasSelected(field, keyword) {
+  const value = getAnswerValue(answers, field);
+  const list = Array.isArray(value) ? value : value ? [value] : [];
+  return list.some((item) => String(item).includes(keyword));
+}
+
+function mapExercise(value) {
+  return {
+    "幾乎不運動": 0,
+    "30-60 分鐘": 1,
+    "1-2 小時": 2,
+    "多於 2 小時": 3
+  }[value] ?? 0;
+}
+
+function mapFrequency(value) {
+  return {
+    "不到 1 天": 0,
+    "2-3 天": 2,
+    "4-5 天": 4,
+    "幾乎每天": 6
+  }[value] ?? 0;
+}
+
+function mapCookingFrequency(value) {
+  return {
+    "少於一次": 0,
+    "每週 1-3 次": 2,
+    "每週 4-6 次": 5,
+    "每週 6 次以上": 7
+  }[value] ?? 0;
+}
+
+function mapFemaleValue(valueMap, field) {
+  const sex = getAnswerValue(answers, "demographics.sex");
+  if (sex !== "女性") return -1;
+  const value = getAnswerValue(answers, field);
+  return valueMap[value] ?? 0;
+}
+
+function buildOptimizedFeatureRow() {
+  const sex = getAnswerValue(answers, "demographics.sex");
+  const frequentFoods = getAnswerValue(answers, "diet.frequent_foods");
+  const foodList = Array.isArray(frequentFoods) ? frequentFoods : [];
+  const cookingFrequency = getAnswerValue(answers, "exposure.weekly_cooking_frequency");
+  const anxiety = getAnswerValue(answers, "mental_health.weekly_stress_frequency");
+  const insomnia = getAnswerValue(answers, "mental_health.weekly_sleep_problem_frequency");
+  const depression = getAnswerValue(answers, "mental_health.weekly_low_mood_frequency");
+  const pregnancyCount = normalizeNumber(getAnswerValue(answers, "female_health.pregnancy_count"));
+  const birthCount = normalizeNumber(getAnswerValue(answers, "female_health.live_birth_count"));
+  const row = {
+    record_id: `WEB-${Date.now()}`,
+    sex: sex === "女性" ? 1 : 0,
+    age: calculateAge(),
+    height_cm: normalizeNumber(getAnswerValue(answers, "demographics.height_cm")),
+    weight_kg: normalizeNumber(getAnswerValue(answers, "demographics.weight_kg")),
+    bmi: calculateBmi(),
+    diagnosis: "尚未診斷",
+    is_cancer_patient: 0,
+    prev_cancer: getAnswerValue(answers, "medical_history.personal_cancer_history") === "是，曾罹癌" ? 1 : 0,
+    family_cancer_history: boolFromYesNo(getAnswerValue(answers, "family_history.has_cancer_history")),
+    first_degree_relative_cancer: boolFromYesNo(getAnswerValue(answers, "family_history.has_cancer_history")),
+    chronic_hypertension: hasSelected("medical_history.chronic_conditions", "高血壓") ? 1 : 0,
+    chronic_diabetes: hasSelected("medical_history.chronic_conditions", "糖尿病") ? 1 : 0,
+    chronic_hyperlipidemia: hasSelected("medical_history.chronic_conditions", "高血脂") ? 1 : 0,
+    chronic_liver_disease: hasSelected("medical_history.chronic_conditions", "肝病") ? 1 : 0,
+    chronic_gerd: hasSelected("medical_history.chronic_conditions", "胃食道逆流") ? 1 : 0,
+    chronic_heart_disease: hasSelected("medical_history.chronic_conditions", "心臟病") ? 1 : 0,
+    chronic_thyroid: hasSelected("medical_history.chronic_conditions", "甲狀腺") ? 1 : 0,
+    chronic_asthma_copd: hasSelected("medical_history.chronic_conditions", "氣喘") ? 1 : 0,
+    chronic_gout: hasSelected("medical_history.chronic_conditions", "痛風") ? 1 : 0,
+    chronic_arthritis: hasSelected("medical_history.chronic_conditions", "關節炎") ? 1 : 0,
+    chronic_mental: hasSelected("medical_history.chronic_conditions", "憂鬱症") ? 1 : 0,
+    chronic_stroke: hasSelected("medical_history.chronic_conditions", "中風") ? 1 : 0,
+    chronic_kidney: hasSelected("medical_history.chronic_conditions", "腎臟病") ? 1 : 0,
+    chronic_autoimmune: hasSelected("medical_history.chronic_conditions", "自體免疫") ? 1 : 0,
+    chronic_other_unclassified: hasSelected("medical_history.chronic_conditions", "其他慢性疾病") ? 1 : 0,
+    chronic_disease_count: 0,
+    smoking: boolFromYesNo(getAnswerValue(answers, "exposure.smoking_ever")),
+    quit_smoking: getAnswerValue(answers, "exposure.smoking_quit_status") === "是，已戒菸" ? 1 : 0,
+    secondhand_smoke: boolFromYesNo(getAnswerValue(answers, "exposure.secondhand_smoke")),
+    betel_nut: boolFromYesNo(getAnswerValue(answers, "exposure.betel_nut_ever")),
+    radiation_exposure: boolFromYesNo(getAnswerValue(answers, "exposure.radiation_exposure")),
+    cooking_fumes: boolFromYesNo(getAnswerValue(answers, "exposure.cooking_fume")),
+    air_pollution: boolFromYesNo(getAnswerValue(answers, "exposure.air_pollution")),
+    cooking_freq_missing: cookingFrequency ? 0 : 1,
+    cooking_freq_per_week: mapCookingFrequency(cookingFrequency),
+    weight_change_6m: boolFromYesNo(getAnswerValue(answers, "demographics.weight_change_over_5_percent")),
+    exercise_per_week: mapExercise(getAnswerValue(answers, "lifestyle.weekly_exercise_time")),
+    anxiety_freq_missing: anxiety === "不到 1 天" ? 1 : 0,
+    anxiety_freq: mapFrequency(anxiety),
+    insomnia_freq_missing: insomnia === "不到 1 天" ? 1 : 0,
+    insomnia_freq: mapFrequency(insomnia),
+    depression_freq_missing: depression === "不到 1 天" ? 1 : 0,
+    depression_freq: mapFrequency(depression),
+    alcohol: foodList.some((item) => item.includes("飲酒")) ? 1 : 0,
+    vegetarian: getAnswerValue(answers, "diet.current_diet_type") !== "葷食（無特別限制）" || foodList.some((item) => item.includes("素食")) ? 1 : 0,
+    grilled_fried_food: foodList.some((item) => item.includes("燒烤") || item.includes("油炸")) ? 1 : 0,
+    pickled_food: foodList.some((item) => item.includes("醃漬")) ? 1 : 0,
+    red_meat: foodList.some((item) => item.includes("紅肉")) ? 1 : 0,
+    sweets_junk: foodList.some((item) => item.includes("甜食")) ? 1 : 0,
+    sugary_drinks: foodList.some((item) => item.includes("含糖飲料")) ? 1 : 0,
+    vegetables_fruits: foodList.some((item) => item.includes("蔬菜水果")) ? 1 : 0,
+    high_fat_food_missing: foodList.some((item) => item.includes("高脂肪")) ? 0 : 1,
+    high_fat_food: foodList.some((item) => item.includes("高脂肪")) ? 1 : 0,
+    dairy_missing: getAnswerValue(answers, "diet.daily_milk") ? 0 : 1,
+    dairy: getAnswerValue(answers, "diet.daily_milk") === "是，每天飲用" || foodList.some((item) => item.includes("乳製品")) ? 1 : 0,
+    coffee_habit_missing: foodList.some((item) => item.includes("咖啡")) ? 0 : 1,
+    tea_habit_missing: foodList.some((item) => item.includes("茶")) ? 0 : 1,
+    coffee_habit: foodList.some((item) => item.includes("咖啡")) ? 1 : 0,
+    tea_habit: foodList.some((item) => item.includes("茶")) ? 1 : 0,
+    menarche_early: mapFemaleValue({ "12 歲以前（含 12 歲）": 1, "13 歲以後（含 13 歲）": 0 }, "female_health.menarche_age"),
+    menopause_ordinal: mapFemaleValue({ "尚未停經（月經仍規律來）": 0, "已停經（55 歲或以前停經）": 1, "已停經（55 歲或以後停經）": 2, "已切除子宮或卵巢": 3 }, "female_health.menopause_status"),
+    first_pregnancy_age_ordinal: mapFemaleValue({ "從未懷孕": 0, "20 歲以下": 1, "20-30 歲": 2, "31-35 歲": 3, "36 歲以上": 4 }, "female_health.first_pregnancy_age"),
+    num_pregnancies: sex === "女性" ? pregnancyCount ?? 0 : -1,
+    num_births: sex === "女性" ? birthCount ?? 0 : -1,
+    breastfed: mapFemaleValue({ "從未哺乳": 0, "有哺乳，但少於 6 個月": 1, "有哺乳，超過 6 個月（含 6 個月）": 1, "尚未生產，此題不適用": 0 }, "female_health.breastfeeding_history"),
+    pap_smear_done: mapFemaleValue({ "是，歷次結果均正常": 1, "是，曾有異常報告（如 CIN、HPV 陽性等）": 1, "否，從未做過": 0 }, "female_health.pap_smear_history"),
+    pap_smear_abnormal: mapFemaleValue({ "是，歷次結果均正常": 0, "是，曾有異常報告（如 CIN、HPV 陽性等）": 1, "否，從未做過": 0 }, "female_health.pap_smear_history"),
+    hormone_drug: mapFemaleValue({ "是，使用超過 1 年": 1, "是，使用不到 1 年": 1, "否，從未使用": 0 }, "female_health.hormone_medication"),
+    score: "",
+    data_source: "interactive_mvp"
+  };
+  row.chronic_disease_count = [
+    row.chronic_hypertension, row.chronic_diabetes, row.chronic_hyperlipidemia, row.chronic_liver_disease,
+    row.chronic_gerd, row.chronic_heart_disease, row.chronic_thyroid, row.chronic_asthma_copd,
+    row.chronic_gout, row.chronic_arthritis, row.chronic_mental, row.chronic_stroke,
+    row.chronic_kidney, row.chronic_autoimmune, row.chronic_other_unclassified
+  ].reduce((sum, value) => sum + value, 0);
+  return optimizedFeatureColumns.reduce((ordered, column) => {
+    ordered[column] = row[column] ?? "";
+    return ordered;
+  }, {});
+}
+
+function checkOptimizedFeatureRow(row) {
+  const messages = [];
+  const sex = getAnswerValue(answers, "demographics.sex");
+  const smokingEver = getAnswerValue(answers, "exposure.smoking_ever");
+  const smokingQuit = getAnswerValue(answers, "exposure.smoking_quit_status");
+  const pregnancyCount = normalizeNumber(getAnswerValue(answers, "female_health.pregnancy_count"));
+  const liveBirthCount = normalizeNumber(getAnswerValue(answers, "female_health.live_birth_count"));
+
+  if (sex === "男性" && optimizedFeatureColumns.slice(60, 69).some((column) => row[column] !== -1)) {
+    messages.push("男性路徑中不應出現女性相關題組答案。");
+  }
+  if (smokingEver === "否" && smokingQuit) {
+    messages.push("抽菸習慣填否，但仍出現戒菸狀態。");
+  }
+  if (pregnancyCount != null && liveBirthCount != null && liveBirthCount > pregnancyCount) {
+    messages.push("生產胎數大於懷孕次數，需再次確認。");
+  }
+  return messages;
+}
+
+function buildSubmissionRows() {
+  const submittedAt = new Date().toISOString();
+  const email = getAnswerValue(answers, "contact.email") || "";
+  return Object.values(answers).map((entry) => ({
+    submitted_at: submittedAt,
+    email,
+    question_id: entry.question_id,
+    question_text: entry.label,
+    answer: Array.isArray(entry.value) ? entry.value.join("; ") : String(entry.value)
+  })).concat([
+    {
+      submitted_at: submittedAt,
+      email,
+      question_id: "derived_bmi",
+      question_text: "BMI",
+      answer: String(calculateBmi())
+    }
+  ]);
+}
+
+function storeSubmissionForIntegration() {
+  const rows = buildSubmissionRows();
+  const optimizedFeatureRow = buildOptimizedFeatureRow();
+  const missingColumns = optimizedFeatureColumns.filter((column) => optimizedFeatureRow[column] === "" && column !== "score");
+  const submission = {
+    submitted_at: new Date().toISOString(),
+    email: getAnswerValue(answers, "contact.email") || "",
+    rows,
+    optimized_feature_columns: optimizedFeatureColumns,
+    optimized_feature_row: optimizedFeatureRow,
+    data_quality: {
+      missing_columns: missingColumns,
+      contradiction_warnings: checkOptimizedFeatureRow(optimizedFeatureRow)
+    }
+  };
+  window.latestSubmission = submission;
+  try {
+    const existing = JSON.parse(localStorage.getItem("assessment_submissions") || "[]");
+    existing.push(submission);
+    localStorage.setItem("assessment_submissions", JSON.stringify(existing));
+  } catch (error) {
+    window.latestSubmissionStorageError = true;
+  }
+  return submission;
+}
+
+function safeJsonForHtml(value) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+async function submitToPowerAutomate(submission) {
+  const response = await fetch(SUBMISSION_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(submission)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Submission failed: ${response.status}`);
+  }
+
+  window.latestPowerAutomateSubmit = {
+    ok: true,
+    submitted_at: new Date().toISOString()
+  };
+  return { ok: true };
+}
+
+function showSubmitError(message) {
+  const panel = document.querySelector(".confirm-panel");
+  if (!panel) return;
+  const existing = panel.querySelector(".submit-error");
+  if (existing) existing.remove();
+  const error = document.createElement("p");
+  error.className = "submit-error";
+  error.textContent = message;
+  panel.querySelector(".result-actions")?.before(error);
+}
+
+async function renderResult() {
+  const submission = storeSubmissionForIntegration();
+  const runButton = document.querySelector("#runModelBtn");
+  if (runButton) {
+    runButton.disabled = true;
+    runButton.textContent = currentLang === "en" ? "Submitting..." : "送出中...";
+  }
+
+  try {
+    await submitToPowerAutomate(submission);
+  } catch (error) {
+    window.latestPowerAutomateSubmit = {
+      ok: false,
+      error: error.message
+    };
+    if (runButton) {
+      runButton.disabled = false;
+      runButton.textContent = currentLang === "en" ? i18n.en.ui.submitReview : "確認並送出";
+    }
+    showSubmitError(currentLang === "en"
+      ? "Submission failed. Please try again later or contact support."
+      : "資料送出失敗，請稍後再試或聯繫服務人員。");
+    return;
+  }
+
+  const moduleIndex = modules.findIndex((item) => item.id === "result");
+  moduleList.innerHTML = modules.map((module, index) => `
+    <li class="${index < moduleIndex ? "is-done" : index === moduleIndex ? "is-active" : ""}">
+      <span class="module-index">${index < moduleIndex ? "✓" : index + 1}</span>
+      <span>${getModuleCopy(module)[0]}</span>
+    </li>
+  `).join("");
+  sectionTitle.textContent = currentLang === "en" ? i18n.en.ui.completedSection : "完成送出";
+  sectionSummary.textContent = currentLang === "en" ? i18n.en.ui.completedSummary : "感謝您的填答。";
+  guideMessage.textContent = currentLang === "en" ? i18n.en.ui.completedGuide : "您的填答已完成送出。請留意您填寫的 Email 信箱。";
+
+  questionArea.innerHTML = `
+    <div class="result-panel">
+      <p class="eyebrow">${currentLang === "en" ? i18n.en.ui.completedSection : "已完成"}</p>
+      <h2 class="question-title">${currentLang === "en" ? i18n.en.ui.completedTitle : "感謝您的填答"}</h2>
+      <p class="question-note">${currentLang === "en" ? `${i18n.en.ui.completedNote} ${submission.email}.` : `本次健康探索已完成，您的結果已寄送至 ${submission.email}。`}</p>
+      <p class="question-note">${currentLang === "en" ? i18n.en.ui.completedInbox : "請留意信箱收件匣與垃圾郵件匣。"}</p>
+      <p class="disclaimer question-note">${currentLang === "en" ? i18n.en.ui.disclaimer : "本評估結果僅供健康教育與自我健康管理參考，不代表醫療診斷、疾病篩檢結果或治療建議。"}</p>
+      <script type="application/json" id="submissionRowsJson">${safeJsonForHtml(submission.rows)}</script>
+      <script type="application/json" id="structuredFeaturesJson">${safeJsonForHtml({
+        schema_version: "10Cancer_AI_structure_data_v1_compatible",
+        columns: submission.optimized_feature_columns,
+        row: submission.optimized_feature_row,
+        data_quality: submission.data_quality
+      })}</script>
+    </div>
+  `;
+  inputZone.hidden = true;
+  panelFooter.hidden = true;
+}
+
+document.querySelectorAll(".mode-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    if (tab.hidden) return;
+    activeMode = tab.dataset.mode;
+    document.querySelectorAll(".mode-tab").forEach((item) => item.classList.toggle("is-active", item === tab));
+    quickOptions.hidden = activeMode !== "quick";
+    freeAnswer.hidden = activeMode !== "text";
+    voiceAnswer.hidden = activeMode !== "voice";
+    parseCard.hidden = true;
+  });
+});
+
+freeText.addEventListener("input", () => {
+  const question = getCurrentQuestion();
+  if (question?.type !== "text") return;
+  freeText.dataset.followupShown = "";
+  llmDraft = parseSymptomText(freeText.value);
+  renderLlmPanel(llmDraft);
+});
+
+parseTextBtn.addEventListener("click", () => {
+  const question = getCurrentQuestion();
+  if (question?.type === "text") {
+    const value = freeText.value.trim();
+    if (!value) {
+      showInlineNotice(currentLang === "en" ? i18n.en.ui.required : "請輸入您的回答。若最近三個月沒有身體不適，請填寫「無」。");
+      return;
+    }
+    const parsed = parseSymptomText(value);
+    llmDraft = parsed;
+    renderLlmPanel(parsed);
+    if (!parsed.ready_to_close && !freeText.dataset.followupShown) {
+      freeText.dataset.followupShown = "true";
+      return;
+    }
+    freeText.dataset.followupShown = "";
+    saveAnswer(value, "free_text_llm_assisted", parsed);
+    return;
+  }
+});
+
+voiceBtn.addEventListener("click", () => {
+  const question = getCurrentQuestion();
+  if (question?.type === "text") showInlineNotice(currentLang === "en" ? i18n.en.ui.voiceUnavailable : "語音回答功能（建立中），請先使用文字回答。");
+});
+
+if (guideStage) {
+  guideStage.addEventListener("pointermove", (event) => {
+    const rect = guideStage.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+    guideStage.style.setProperty("--tilt-y", `${x * 7}deg`);
+    guideStage.style.setProperty("--tilt-x", `${y * -6}deg`);
+  });
+
+  guideStage.addEventListener("pointerleave", () => {
+    guideStage.style.setProperty("--tilt-y", "0deg");
+    guideStage.style.setProperty("--tilt-x", "0deg");
+  });
+}
+
+backBtn.addEventListener("click", () => {
+  if (currentIndex > 0) {
+    currentIndex -= 1;
+    inputZone.hidden = false;
+    skipBtn.hidden = false;
+    panelFooter.hidden = false;
+    renderQuestion();
+  }
+});
+
+skipBtn.addEventListener("click", () => {
+  if (getCurrentQuestion()?.id === "consent_acknowledgement") return;
+  saveAnswer("不確定", "uncertain");
+});
+
+startBtn.addEventListener("click", () => {
+  assessment.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+languageButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    currentLang = button.dataset.lang;
+    localStorage.setItem("egbiomed_lang", currentLang);
+    applyStaticText();
+    renderQuestion();
+  });
+});
+
+applyStaticText();
+renderModules();
+renderQuestion();

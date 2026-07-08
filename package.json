@@ -1,0 +1,12 @@
+{
+  "name": "eg-biomed-cancer-risk-assessment",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EG BioMed AI cancer risk interactive assessment platform.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

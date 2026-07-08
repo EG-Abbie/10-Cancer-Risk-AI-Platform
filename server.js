@@ -1,0 +1,155 @@
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+
+const PORT = Number(process.env.PORT || 3000);
+const POWER_AUTOMATE_WEBHOOK_URL = process.env.POWER_AUTOMATE_WEBHOOK_URL || "";
+const MAX_BODY_BYTES = 1024 * 1024;
+
+const PUBLIC_DIR = __dirname;
+const MIME_TYPES = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon"
+};
+
+function sendJson(res, statusCode, payload) {
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store"
+  });
+  res.end(JSON.stringify(payload));
+}
+
+function applySecurityHeaders(res) {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+}
+
+function readRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    let received = 0;
+
+    req.on("data", (chunk) => {
+      received += chunk.length;
+      if (received > MAX_BODY_BYTES) {
+        reject(new Error("Payload too large"));
+        req.destroy();
+        return;
+      }
+      body += chunk;
+    });
+
+    req.on("end", () => resolve(body));
+    req.on("error", reject);
+  });
+}
+
+async function forwardSubmission(req, res) {
+  if (!POWER_AUTOMATE_WEBHOOK_URL) {
+    sendJson(res, 503, {
+      ok: false,
+      error: "POWER_AUTOMATE_WEBHOOK_URL is not configured."
+    });
+    return;
+  }
+
+  let submission;
+  try {
+    const rawBody = await readRequestBody(req);
+    submission = JSON.parse(rawBody);
+  } catch (error) {
+    sendJson(res, 400, { ok: false, error: "Invalid JSON payload." });
+    return;
+  }
+
+  if (!submission || typeof submission !== "object" || !submission.optimized_feature_row) {
+    sendJson(res, 422, { ok: false, error: "Missing optimized_feature_row." });
+    return;
+  }
+
+  try {
+    const response = await fetch(POWER_AUTOMATE_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(submission)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      sendJson(res, 502, {
+        ok: false,
+        error: "Power Automate rejected the submission.",
+        status: response.status,
+        detail: errorText.slice(0, 500)
+      });
+      return;
+    }
+
+    sendJson(res, 200, { ok: true });
+  } catch (error) {
+    sendJson(res, 502, {
+      ok: false,
+      error: "Could not forward submission."
+    });
+  }
+}
+
+function serveStatic(req, res) {
+  const requestUrl = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  const pathname = decodeURIComponent(requestUrl.pathname);
+  const safePath = pathname === "/" ? "/index.html" : pathname;
+  const filePath = path.normalize(path.join(PUBLIC_DIR, safePath));
+
+  if (!filePath.startsWith(PUBLIC_DIR) || filePath === __filename) {
+    res.writeHead(404);
+    res.end("Not found");
+    return;
+  }
+
+  fs.stat(filePath, (statError, stats) => {
+    if (statError || !stats.isFile()) {
+      res.writeHead(404);
+      res.end("Not found");
+      return;
+    }
+
+    const ext = path.extname(filePath).toLowerCase();
+    res.writeHead(200, {
+      "Content-Type": MIME_TYPES[ext] || "application/octet-stream",
+      "Cache-Control": ext === ".html" ? "no-store" : "public, max-age=3600"
+    });
+    fs.createReadStream(filePath).pipe(res);
+  });
+}
+
+const server = http.createServer(async (req, res) => {
+  applySecurityHeaders(res);
+
+  if (req.method === "POST" && req.url === "/api/submit") {
+    await forwardSubmission(req, res);
+    return;
+  }
+
+  if (req.method === "GET" || req.method === "HEAD") {
+    serveStatic(req, res);
+    return;
+  }
+
+  sendJson(res, 405, { ok: false, error: "Method not allowed." });
+});
+
+server.listen(PORT, () => {
+  console.log(`EG BioMed assessment server listening on port ${PORT}`);
+});

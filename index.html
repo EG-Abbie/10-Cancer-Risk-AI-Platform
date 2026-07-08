@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI 癌症風險互動評估</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="hero-title">
+        <img class="hero__image" src="assets/health-guide-hero.png" alt="" />
+        <div class="hero__overlay"></div>
+        <div class="hero__content">
+          <div class="brand-row">
+            <span class="brand-mark" aria-hidden="true">
+              <img src="assets/eg-biomed-icon.png" alt="" />
+            </span>
+            <span>EG BioMed 愛立基生醫</span>
+          </div>
+          <div class="language-switcher" aria-label="Language">
+            <button class="language-switcher__button is-active" type="button" data-lang="zh">中文</button>
+            <button class="language-switcher__button" type="button" data-lang="en">English</button>
+          </div>
+          <h1 id="hero-title">AI 癌症風險互動評估</h1>
+          <p class="hero__subtitle">
+            透過 5-8 分鐘的互動問答，了解與你相關的癌症風險因子組合。
+          </p>
+          <div class="trust-strip" aria-label="評估說明">
+            <span>非醫療診斷</span>
+            <span>資料確認後才送出</span>
+            <span>完成後取得個人化摘要</span>
+          </div>
+          <button class="primary-action" id="startBtn" type="button">
+            開始互動評估
+          </button>
+          <p class="disclaimer">
+            本結果僅供健康教育與自我健康管理參考，不構成醫療診斷、疾病篩檢結果或治療建議。
+          </p>
+        </div>
+      </section>
+
+      <section class="workspace" id="assessment" aria-live="polite">
+        <aside class="progress-panel" aria-label="評估進度">
+          <div>
+            <p class="eyebrow">目前章節</p>
+            <h2 id="sectionTitle">基本資料</h2>
+            <p id="sectionSummary">先確認基本填答資訊。</p>
+          </div>
+          <ol class="module-list" id="moduleList"></ol>
+        </aside>
+
+        <section class="conversation-panel">
+          <header class="panel-header">
+            <div class="guide-stage" id="guideStage" aria-hidden="true">
+              <div class="guide-stage__aura"></div>
+              <div class="guide-stage__portrait">
+                <img src="assets/ai-health-guide-character.png" alt="" />
+                <span class="guide-stage__scan"></span>
+              </div>
+              <div class="guide-stage__orb">
+                <span></span>
+              </div>
+              <div class="guide-stage__chip guide-stage__chip--one">生活習慣</div>
+              <div class="guide-stage__chip guide-stage__chip--two">家族史</div>
+              <div class="guide-stage__chip guide-stage__chip--three">身體狀況</div>
+              <div class="guide-stage__status">
+                <span></span>
+                陪伴・理解・支持
+              </div>
+            </div>
+            <div>
+              <p class="eyebrow">AI Health Guide</p>
+              <p id="guideMessage">
+                接下來我會用幾個簡單問題，幫你整理和癌症風險相關的生活習慣、家族史與身體狀況。
+              </p>
+            </div>
+          </header>
+
+          <div class="question-area" id="questionArea"></div>
+
+          <div class="input-zone" id="inputZone">
+            <div class="mode-tabs" role="tablist" aria-label="回答方式">
+              <button class="mode-tab is-active" data-mode="quick" type="button">快速選項</button>
+              <button class="mode-tab" data-mode="text" type="button">文字回答</button>
+              <button class="mode-tab" data-mode="voice" type="button">語音回答（建立中）</button>
+            </div>
+            <div class="quick-options" id="quickOptions"></div>
+            <div class="free-answer" id="freeAnswer" hidden>
+              <textarea id="freeText" rows="4" placeholder="例如：我大學有抽菸，28 歲戒掉，現在聚餐偶爾一兩根。"></textarea>
+              <button class="secondary-action" id="parseTextBtn" type="button">儲存並繼續</button>
+            </div>
+            <div class="voice-answer" id="voiceAnswer" hidden>
+              <button class="voice-button" id="voiceBtn" type="button" aria-pressed="false">
+                <span class="voice-dot" aria-hidden="true"></span>
+                語音回答（建立中）
+              </button>
+              <p>語音回答功能（建立中），請先使用文字回答。</p>
+            </div>
+          </div>
+
+          <div class="parse-card" id="parseCard" hidden></div>
+
+          <footer class="panel-footer">
+            <button class="ghost-action" id="backBtn" type="button">上一題</button>
+            <button class="ghost-action" id="skipBtn" type="button">不確定怎麼回答</button>
+          </footer>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

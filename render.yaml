@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: eg-biomed-cancer-risk-assessment
+    env: node
+    plan: starter
+    buildCommand: ""
+    startCommand: "npm start"
+    envVars:
+      - key: POWER_AUTOMATE_WEBHOOK_URL
+        sync: false
