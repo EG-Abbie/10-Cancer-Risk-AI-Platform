@@ -40,6 +40,9 @@ npm start
 - 每份填答會另外生成參考 `10Cancer_AI_structure_data_v1.xlsx` 的 71 欄最佳化寬表資料，包含單位轉換、多選編碼、缺失值與矛盾提醒，存於隱藏節點 `#structuredFeaturesJson`
 - 前端送出至同站台 `/api/submit`
 - `server.js` 由環境變數讀取 Power Automate webhook URL，避免把簽章 URL 暴露在公開 JavaScript
+- 送出 payload 同時包含：
+  - `optimized_feature_row`：固定 71 欄模型 feature，供模型 API 使用
+  - `excel_row`：Excel 留存列，包含 71 欄 feature 加上 email、送出時間、近期身體狀況自由文字與 LLM 結構化摘要
 
 ## 正式部署到 Render
 
@@ -72,9 +75,39 @@ https://eg-biomed-cancer-risk-assessment.onrender.com
 使用者瀏覽器
 → Render /api/submit
 → Power Automate
-→ Excel Office Script 寫入結構化資料
-→ 模型 API
+→ Excel Office Script 寫入 excel_row
+→ 模型 API 使用 optimized_feature_row
 → Email 報告
+```
+
+## Power Automate 欄位對應
+
+Excel 的「執行指令碼」參數建議使用：
+
+```text
+string(body('Parse_JSON')?['excel_row'])
+```
+
+模型 API 的 HTTP body 建議繼續使用：
+
+```text
+body('Parse_JSON')?['optimized_feature_row']
+```
+
+若 Excel 需要留存自由文字，請在 `CancerRiskResponses` 表格最後新增欄位：
+
+```text
+submitted_at
+email
+recent_discomfort_text
+recent_discomfort_no_symptom
+recent_discomfort_body_parts
+recent_discomfort_symptoms
+recent_discomfort_duration
+recent_discomfort_severity
+recent_discomfort_care_seeking
+recent_discomfort_follow_up
+recent_discomfort_ready_to_close
 ```
 
 ## 注意事項

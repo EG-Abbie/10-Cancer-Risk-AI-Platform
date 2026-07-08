@@ -1099,16 +1099,39 @@ function buildSubmissionRows() {
   ]);
 }
 
+function buildExcelRow(optimizedFeatureRow, submittedAt) {
+  const symptomEntry = Object.values(answers).find((entry) => entry.field === "recent_health.recent_discomfort");
+  const structured = symptomEntry?.structured || {};
+  const join = (value) => Array.isArray(value) ? value.join("; ") : "";
+
+  return {
+    ...optimizedFeatureRow,
+    submitted_at: submittedAt,
+    email: getAnswerValue(answers, "contact.email") || "",
+    recent_discomfort_text: symptomEntry?.value ? String(symptomEntry.value) : "",
+    recent_discomfort_no_symptom: structured.no_symptom === true ? 1 : 0,
+    recent_discomfort_body_parts: join(structured.body_parts),
+    recent_discomfort_symptoms: join(structured.symptoms),
+    recent_discomfort_duration: structured.duration || "",
+    recent_discomfort_severity: structured.severity || "",
+    recent_discomfort_care_seeking: structured.care_seeking || "",
+    recent_discomfort_follow_up: structured.follow_up || "",
+    recent_discomfort_ready_to_close: structured.ready_to_close === true ? 1 : 0
+  };
+}
+
 function storeSubmissionForIntegration() {
+  const submittedAt = new Date().toISOString();
   const rows = buildSubmissionRows();
   const optimizedFeatureRow = buildOptimizedFeatureRow();
   const missingColumns = optimizedFeatureColumns.filter((column) => optimizedFeatureRow[column] === "" && column !== "score");
   const submission = {
-    submitted_at: new Date().toISOString(),
+    submitted_at: submittedAt,
     email: getAnswerValue(answers, "contact.email") || "",
     rows,
     optimized_feature_columns: optimizedFeatureColumns,
     optimized_feature_row: optimizedFeatureRow,
+    excel_row: buildExcelRow(optimizedFeatureRow, submittedAt),
     data_quality: {
       missing_columns: missingColumns,
       contradiction_warnings: checkOptimizedFeatureRow(optimizedFeatureRow)
