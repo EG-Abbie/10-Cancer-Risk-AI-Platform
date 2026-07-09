@@ -42,7 +42,7 @@ npm start
 - `server.js` 由環境變數讀取 Power Automate webhook URL，避免把簽章 URL 暴露在公開 JavaScript
 - 送出 payload 同時包含：
   - `optimized_feature_row`：固定 71 欄模型 feature，供模型 API 使用
-  - `excel_row`：Excel 留存列，包含 71 欄 feature 加上 email、送出時間、近期身體狀況自由文字與 LLM 結構化摘要
+  - `excel_row`：Excel 留存列，包含 71 欄 feature 加上 email、送出時間、填答語言、近期身體狀況自由文字與 LLM 結構化摘要
 
 ## 正式部署到 Render
 
@@ -99,6 +99,8 @@ body('Parse_JSON')?['optimized_feature_row']
 ```text
 submitted_at
 email
+language
+report_language
 recent_discomfort_text
 recent_discomfort_no_symptom
 recent_discomfort_body_parts

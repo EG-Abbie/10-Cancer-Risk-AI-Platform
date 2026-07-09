@@ -1108,6 +1108,8 @@ function buildExcelRow(optimizedFeatureRow, submittedAt) {
     ...optimizedFeatureRow,
     submitted_at: submittedAt,
     email: getAnswerValue(answers, "contact.email") || "",
+    language: currentLang,
+    report_language: currentLang === "en" ? "en" : "zh-Hant",
     recent_discomfort_text: symptomEntry?.value ? String(symptomEntry.value) : "",
     recent_discomfort_no_symptom: structured.no_symptom === true ? 1 : 0,
     recent_discomfort_body_parts: join(structured.body_parts),
@@ -1128,6 +1130,8 @@ function storeSubmissionForIntegration() {
   const submission = {
     submitted_at: submittedAt,
     email: getAnswerValue(answers, "contact.email") || "",
+    language: currentLang,
+    report_language: currentLang === "en" ? "en" : "zh-Hant",
     rows,
     optimized_feature_columns: optimizedFeatureColumns,
     optimized_feature_row: optimizedFeatureRow,

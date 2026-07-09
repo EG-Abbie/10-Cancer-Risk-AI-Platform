@@ -68,6 +68,8 @@ function buildFallbackExcelRow(submission) {
     ...submission.optimized_feature_row,
     submitted_at: submission.submitted_at || new Date().toISOString(),
     email: submission.email || findAnswer(submission.rows, "email"),
+    language: submission.language || "zh",
+    report_language: submission.report_language || submission.language || "zh-Hant",
     recent_discomfort_text: recentDiscomfortText,
     recent_discomfort_no_symptom: noSymptom ? 1 : 0,
     recent_discomfort_body_parts: "",
