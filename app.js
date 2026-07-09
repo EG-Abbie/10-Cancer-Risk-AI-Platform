@@ -100,7 +100,6 @@ const i18n = {
       lifestyle: "Lifestyle",
       familyHistory: "Family History",
       bodyStatus: "Body Status",
-      guideStatus: "Care・Clarity・Support",
       progress: "Health exploration progress",
       questionCount: "Question",
       of: "of",
@@ -371,7 +370,6 @@ function applyStaticText() {
   document.querySelector(".guide-stage__chip--one").textContent = currentLang === "en" ? i18n.en.ui.lifestyle : "生活習慣";
   document.querySelector(".guide-stage__chip--two").textContent = currentLang === "en" ? i18n.en.ui.familyHistory : "家族史";
   document.querySelector(".guide-stage__chip--three").textContent = currentLang === "en" ? i18n.en.ui.bodyStatus : "身體狀況";
-  document.querySelector(".guide-stage__status").lastChild.textContent = currentLang === "en" ? i18n.en.ui.guideStatus : "陪伴・理解・支持";
   languageButtons.forEach((button) => button.classList.toggle("is-active", button.dataset.lang === currentLang));
 }
 
