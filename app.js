@@ -8,7 +8,6 @@ const modules = [
   { id: "mental", title: "心理健康", summary: "記錄近期壓力、睡眠與情緒困擾頻率。" },
   { id: "diet", title: "飲食習慣", summary: "收集飲食型態、常見食物、牛奶、豆製品與益生菌習慣。" },
   { id: "history", title: "病史與家族史", summary: "確認個人癌症、慢性疾病與家族癌症史。" },
-  { id: "symptoms", title: "近期身體狀況", summary: "補充最近三個月是否有身體不適。" },
   { id: "contact", title: "聯絡資料", summary: "填寫接收結果報告的 Email。" },
   { id: "confirm", title: "資料確認", summary: "送出前，請確認填答內容。" },
   { id: "result", title: "完成送出", summary: "感謝您的填答。" }
@@ -75,7 +74,6 @@ const questions = [
   { id: "family_cancer", module: "history", type: "single", required: true, title: "家族成員（一等親內）是否有癌症史？", note: "一等親包含父母、兄弟姊妹、子女。", field: "family_history.has_cancer_history", options: ["是", "否", "不清楚"] },
   { id: "family_self_types", module: "history", type: "multi", required: false, title: "承上題，若有家族成員（一等親內）癌症史，請列出是什麼癌症？", note: "可複選。", field: "family_history.cancer_types_self_side", options: cancerOptions, appliesIf: (answers) => getAnswerValue(answers, "family_history.has_cancer_history") === "是" },
 
-  { id: "recent_discomfort", module: "symptoms", type: "text", required: true, title: "最近三個月是否有身體不適？", note: "若有，請簡短描述症狀、持續時間與是否已就醫；若沒有，請填寫「無」。", field: "recent_health.recent_discomfort", placeholder: "例如：近兩個月容易胃脹、偶爾腹痛，尚未就醫。" },
   { id: "email", module: "contact", type: "email", required: true, title: "請填寫您的 Email", note: "結果報告將寄送至此 Email。", field: "contact.email", placeholder: "name@example.com" }
 ];
 
@@ -96,7 +94,7 @@ const i18n = {
       voice: "Voice Answer (In progress)",
       back: "Back",
       uncertain: "Not sure how to answer",
-      guideIntro: "I will guide you through a few simple questions to organize lifestyle habits, family history, and health status related to cancer risk. Recent physical symptoms can be answered by text. Voice answer is in progress.",
+      guideIntro: "I will guide you through a few simple questions to organize lifestyle habits, family history, and health status related to cancer risk.",
       guideDefault: "Previous question completed. Please answer based on your closest everyday situation.",
       lifestyle: "Lifestyle",
       familyHistory: "Family History",
@@ -150,7 +148,6 @@ const i18n = {
       mental: ["Mental Health", "Record recent stress, sleep, and low mood frequency."],
       diet: ["Dietary Habits", "Collect diet type, common foods, milk, soy products, and probiotics habits."],
       history: ["Medical and Family History", "Confirm personal cancer history, chronic diseases, and family cancer history."],
-      symptoms: ["Recent Physical Status", "Add recent physical discomfort in the past three months."],
       contact: ["Contact Information", "Enter the email address for receiving the report."],
       confirm: ["Data Review", "Please review your answers before submission."],
       result: ["Completed", "Thank you for your response."]
@@ -162,8 +159,7 @@ const i18n = {
       exposure: "Tobacco and environmental exposure completed. Next, we will ask about stress, sleep, and mood.",
       mental: "Mental health completed. Next, we will ask about dietary habits.",
       diet: "Dietary habits completed. Next, we will ask about personal and family medical history.",
-      history: "Medical and family history completed. Next, we will ask about recent physical status.",
-      symptoms: "Recent physical status completed. Next, please enter the email address for receiving your report.",
+      history: "Medical and family history completed. Next, please enter the email address for receiving your report.",
       contact: "Contact information completed. Finally, please review your answers."
     },
     symptom: {
@@ -230,7 +226,6 @@ const i18n = {
       chronic_conditions: ["Do you have any of the following chronic diseases?", "You may select multiple. If none apply, select none of the above."],
       family_cancer: ["Has any first-degree family member had cancer?", "First-degree relatives include parents, siblings, and children."],
       family_self_types: ["If yes, what type of cancer did your first-degree family member have?", "You may select multiple."],
-      recent_discomfort: ["Have you had any physical discomfort in the past three months?", "If yes, briefly describe the symptom, duration, and whether you have seen a clinician. If not, enter \"None\".", "For example: bloating and occasional abdominal pain for the past two months; not yet seen a clinician."],
       email: ["Please enter your email", "The result report will be sent to this email.", "name@example.com"]
     },
     options: {
@@ -312,7 +307,7 @@ const guideStage = document.querySelector("#guideStage");
 const languageButtons = document.querySelectorAll(".language-switcher__button");
 
 const zhUi = {
-  guideIntro: "接下來我會用幾個簡單問題，幫你整理和癌症風險相關的生活習慣、家族史與身體狀況。近期身體狀況可用文字回答，語音回答（建立中）。",
+  guideIntro: "接下來我會用幾個簡單問題，幫你整理和癌症風險相關的生活習慣、家族史與健康狀況。",
   guideDefault: "已完成前一題。請依照最接近日常狀況的答案填寫。",
   progress: "健康探索進度",
   questionCount: "第",
@@ -535,8 +530,7 @@ function getModuleFeedback(fromModuleId, toModuleId) {
     exposure: "已完成菸草與環境暴露評估。接下來會詢問近期壓力、睡眠與情緒狀況。",
     mental: "已完成心理健康評估。接下來會詢問飲食習慣。",
     diet: "已完成飲食習慣評估。接下來會詢問個人病史與家族史。",
-    history: "已完成病史與家族史評估。接下來會補充最近三個月的身體狀況。",
-    symptoms: "已完成近期身體狀況補充。接下來請填寫接收報告的 Email。",
+    history: "已完成病史與家族史評估。接下來請填寫接收報告的 Email。",
     contact: "已完成聯絡資料。最後請確認本次填答內容。"
   };
   if (!fromModuleId || fromModuleId === toModuleId) return "";
