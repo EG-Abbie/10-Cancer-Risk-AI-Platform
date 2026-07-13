@@ -62,6 +62,7 @@ function findAnswer(rows, questionId) {
 
 function buildFallbackExcelRow(submission) {
   const recentDiscomfortText = findAnswer(submission.rows, "recent_discomfort");
+  const personalCancerTypes = findAnswer(submission.rows, "personal_cancer_types");
   const noSymptom = /^(無|沒有|無不適|沒有不舒服|目前沒有|none|no|no symptoms|no discomfort)$/iu.test(recentDiscomfortText.trim());
 
   return {
@@ -70,6 +71,7 @@ function buildFallbackExcelRow(submission) {
     email: submission.email || findAnswer(submission.rows, "email"),
     language: submission.language || "zh",
     report_language: submission.report_language || submission.language || "zh-Hant",
+    personal_cancer_types: personalCancerTypes,
     recent_discomfort_text: recentDiscomfortText,
     recent_discomfort_no_symptom: noSymptom ? 1 : 0,
     recent_discomfort_body_parts: "",
@@ -82,9 +84,25 @@ function buildFallbackExcelRow(submission) {
   };
 }
 
+function normalizeNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function buildAiApiFeatureRow(submission) {
+  const row = {
+    ...submission.optimized_feature_row
+  };
+  row.quit_smoking = Math.max(0, normalizeNumber(row.quit_smoking) ?? 0);
+  return row;
+}
+
 function normalizeSubmission(submission) {
   if (!submission.excel_row || typeof submission.excel_row !== "object") {
     submission.excel_row = buildFallbackExcelRow(submission);
+  }
+  if (!submission.ai_api_feature_row || typeof submission.ai_api_feature_row !== "object") {
+    submission.ai_api_feature_row = buildAiApiFeatureRow(submission);
   }
   return submission;
 }

@@ -613,6 +613,11 @@ html[lang="en"] h1 {
   border: 1px solid var(--line);
 }
 
+.input-zone--consent {
+  border-color: rgba(15, 118, 110, 0.3);
+  background: #f7fbf8;
+}
+
 .mode-tabs {
   display: flex;
   gap: 8px;
@@ -664,6 +669,42 @@ html[lang="en"] h1 {
   animation: option-in 220ms ease-out both;
 }
 
+.option-button--consent {
+  position: relative;
+  min-height: 72px;
+  padding: 16px 16px 16px 58px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.option-button--consent::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #9eb1ac;
+  border-radius: 6px;
+  background: #fff;
+  transform: translateY(-50%);
+}
+
+.option-button--consent.is-selected::before {
+  border-color: var(--teal);
+  background: var(--teal);
+}
+
+.option-button--consent.is-selected::after {
+  content: "✓";
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  color: #fff;
+  font-weight: 900;
+  transform: translateY(-53%);
+}
+
 @keyframes option-in {
   from {
     opacity: 0;
@@ -687,6 +728,11 @@ html[lang="en"] h1 {
   opacity: 0.52;
   transform: none;
   box-shadow: none;
+}
+
+.option-button--consent:disabled {
+  opacity: 0.64;
+  background: #f3f5f2;
 }
 
 .option-button.is-selected {
@@ -735,6 +781,12 @@ input[type="number"] {
 
 #saveMultiBtn {
   grid-column: 1 / -1;
+}
+
+.input-zone--consent #saveMultiBtn {
+  justify-self: stretch;
+  min-height: 56px;
+  font-size: 17px;
 }
 
 .voice-answer {
@@ -936,6 +988,29 @@ input[type="number"] {
   gap: 12px;
 }
 
+.confirm-submit-notice {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 18px;
+  padding: 16px 18px;
+  border: 1px solid rgba(185, 137, 57, 0.38);
+  border-left: 5px solid var(--gold);
+  border-radius: 8px;
+  background: #fffaf0;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+.confirm-submit-notice strong {
+  color: #8a5a0a;
+  font-size: 17px;
+}
+
+.confirm-submit-notice p {
+  margin: 0;
+  color: #40514f;
+}
+
 .answer-review-item {
   display: grid;
   gap: 7px;
@@ -965,6 +1040,28 @@ input[type="number"] {
   background: #f7fbf8;
 }
 
+.consent-step-guide {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 8px;
+  background: #eef8f3;
+  color: var(--teal-deep);
+}
+
+.consent-step-guide strong {
+  font-size: 18px;
+}
+
+.consent-step-guide ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 22px;
+  line-height: 1.65;
+}
+
 .consent-notice__section {
   display: grid;
   gap: 10px;
@@ -977,6 +1074,29 @@ input[type="number"] {
 .consent-notice__section--warning {
   border-color: rgba(201, 107, 87, 0.28);
   background: #fff8f5;
+}
+
+.consent-read-action {
+  justify-self: stretch;
+  min-height: 56px;
+  font-size: 17px;
+}
+
+.consent-option-hint {
+  grid-column: 1 / -1;
+  padding: 14px 16px;
+  border: 1px solid rgba(185, 137, 57, 0.36);
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #74470a;
+  font-weight: 800;
+  line-height: 1.65;
+}
+
+.consent-option-hint.is-ready {
+  border-color: rgba(15, 118, 110, 0.24);
+  background: #eaf7f3;
+  color: var(--teal-deep);
 }
 
 .consent-notice h3 {
@@ -1008,10 +1128,6 @@ input[type="number"] {
   margin: 0;
   color: var(--ink);
   line-height: 1.72;
-}
-
-.consent-read-action {
-  justify-self: start;
 }
 
 .risk-list {
@@ -1469,6 +1585,12 @@ pre {
     font-size: 15px;
     line-height: 1.55;
     overflow-wrap: anywhere;
+  }
+
+  .option-button--consent {
+    min-height: 76px;
+    padding: 15px 14px 15px 54px;
+    font-size: 16px;
   }
 
   input[type="number"],

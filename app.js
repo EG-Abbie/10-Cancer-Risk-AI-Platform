@@ -69,7 +69,8 @@ const questions = [
   { id: "soy_products", module: "diet", type: "single", required: true, title: "是否經常食用豆類製品？", note: "例如豆漿、豆腐、豆干、毛豆等，每週 3 次以上。", field: "diet.soy_products_3x_week", options: ["是，每週 3 次以上", "否，較少食用"] },
   { id: "probiotics", module: "diet", type: "single", required: true, title: "是否規律補充益生菌？", note: "例如優酪乳、優格、益生菌補充品等，每週 3 次以上。", field: "diet.probiotics_3x_week", options: ["是，每週 3 次以上", "否，較少補充"] },
 
-  { id: "personal_cancer", module: "history", type: "single", required: true, title: "是否曾罹患癌症（本次評估以外）？", note: "請依照過去是否曾被診斷為癌症回答。", field: "medical_history.personal_cancer_history", options: ["是，曾罹癌", "否"] },
+  { id: "personal_cancer", module: "history", type: "single", required: true, title: "您目前是否正在罹患癌症，或過去曾被診斷為癌症？", note: "請依照目前或過去是否曾被醫療人員診斷為癌症回答。", field: "medical_history.personal_cancer_history", options: ["是，目前正在治療或追蹤中", "是，過去曾被診斷，目前已完成治療或追蹤", "否，未曾被診斷為癌症"] },
+  { id: "personal_cancer_types", module: "history", type: "multi", required: true, title: "目前或過去曾被診斷的癌別為何？", note: "可複選；若不確定癌別，請選其他癌種。", field: "medical_history.personal_cancer_types", options: cancerOptions, appliesIf: (answers) => isPersonalCancerYes(getAnswerValue(answers, "medical_history.personal_cancer_history")) },
   { id: "chronic_conditions", module: "history", type: "multi", required: true, title: "是否有以下慢性疾病？", note: "可複選；若無相關病史可選以上皆無。", field: "medical_history.chronic_conditions", options: ["高血壓", "糖尿病／高血糖", "高血脂／高膽固醇", "肝病（B 型肝炎／C 型肝炎／肝硬化）", "胃食道逆流", "心臟病／心律不整", "甲狀腺疾病", "氣喘／慢性肺阻塞（COPD）", "痛風／高尿酸", "關節炎（含類風濕性）", "憂鬱症／焦慮症", "中風病史", "腎臟病／洗腎", "自體免疫疾病（乾燥症、紅斑性狼瘡等）", "以上皆無", "其他慢性疾病"] },
   { id: "family_cancer", module: "history", type: "single", required: true, title: "家族成員（一等親內）是否有癌症史？", note: "一等親包含父母、兄弟姊妹、子女。", field: "family_history.has_cancer_history", options: ["是", "否", "不清楚"] },
   { id: "family_self_types", module: "history", type: "multi", required: false, title: "承上題，若有家族成員（一等親內）癌症史，請列出是什麼癌症？", note: "可複選。", field: "family_history.cancer_types_self_side", options: cancerOptions, appliesIf: (answers) => getAnswerValue(answers, "family_history.has_cancer_history") === "是" },
@@ -113,8 +114,11 @@ const i18n = {
       aiDisclaimer: "This only helps organize what you entered. It is not a medical diagnosis.",
       confirmTitle: "Please Review Your Answers",
       confirmSection: "Data Review",
-      confirmSummary: "Please confirm the following answers are correct.",
-      confirmGuide: "Here are the questions and answers you provided. Please review them before submission.",
+      confirmSummary: "Your answers have not been submitted yet. Please review all answers and press the final submit button.",
+      confirmGuide: "This is the final review step. Your information will be submitted only after you confirm all answers and press the button below.",
+      confirmPendingTitle: "Not submitted yet",
+      confirmPendingBody: "Please review every answer on this page. After you confirm the content is correct, press the button at the bottom to submit your information.",
+      submitFinal: "I have reviewed all answers. Submit now",
       completedSection: "Completed",
       completedSummary: "Thank you for your response.",
       completedGuide: "Your answers have been submitted. Please check the email address you provided.",
@@ -126,8 +130,15 @@ const i18n = {
       numberRequired: "Please enter a number, or use \"Not sure how to answer\".",
       multiRequired: "Please select at least one option, or use \"Not sure how to answer\".",
       consentRequired: "Please select all three confirmation statements before continuing.",
-      consentUnlock: "I have read the above notice",
-      consentUnlocked: "You may now select the consent items",
+      consentStepsTitle: "How to complete this page",
+      consentStep1: "Read the notice below",
+      consentStep2: "Press the large button after reading",
+      consentStep3: "Select all three confirmation items, then continue",
+      consentOptionsLocked: "The three confirmation items are locked. Please press the button above after reading the notice.",
+      consentOptionsReady: "Now select all three confirmation items below.",
+      consentUnlock: "I have read this notice. Let me select the consent items",
+      consentUnlocked: "Consent items are now available",
+      consentContinue: "All three items are selected. Continue",
       none: "None",
       notFilled: "Not answered"
     },
@@ -214,7 +225,8 @@ const i18n = {
       milk_daily: ["Do you drink milk every day (at least one 240 ml cup, including shelf-stable milk)?", "If you only drink occasionally, select no."],
       soy_products: ["Do you often consume soy products?", "For example, soy milk, tofu, dried tofu, edamame, at least 3 times per week."],
       probiotics: ["Do you regularly take probiotics?", "For example, yogurt drinks, yogurt, or probiotic supplements, at least 3 times per week."],
-      personal_cancer: ["Have you ever had cancer (outside this assessment)?", "Please answer based on whether you were previously diagnosed with cancer."],
+      personal_cancer: ["Are you currently living with cancer, or have you ever been diagnosed with cancer in the past?", "Please answer based on whether a healthcare professional has diagnosed you with cancer, either currently or in the past."],
+      personal_cancer_types: ["What type of cancer are you currently living with, or have you been diagnosed with in the past?", "You may select multiple. If you are unsure of the exact type, please select other cancer type."],
       chronic_conditions: ["Do you have any of the following chronic diseases?", "You may select multiple. If none apply, select none of the above."],
       family_cancer: ["Has any first-degree family member had cancer?", "First-degree relatives include parents, siblings, and children."],
       family_self_types: ["If yes, what type of cancer did your first-degree family member have?", "You may select multiple."],
@@ -241,7 +253,9 @@ const i18n = {
       "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）": "Mediterranean diet", "彈性蔬食（以植物性食物為主，但偶爾食用肉類、魚類或海鮮）": "Flexitarian diet", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）": "Whole-food plant-based diet", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）": "High fruit/vegetable, low-salt diet", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）": "Ketogenic diet", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）": "Low-carbohydrate diet", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）": "Intermittent fasting",
       "飲酒（每週至少一次）": "Alcohol (at least once per week)", "燒烤或油炸食品": "Grilled or fried foods", "紅肉（牛、羊、豬等）": "Red meat (beef, lamb, pork, etc.)", "醃漬類食品（泡菜、鹹魚等）": "Pickled foods", "甜食或高糖零食": "Sweets or high-sugar snacks", "含糖飲料": "Sugary drinks", "高脂肪食物（速食、肥肉等）": "High-fat foods", "乳製品（起司、優格等）": "Dairy products", "蔬菜水果（每日攝取）": "Vegetables and fruits (daily)", "咖啡（每週至少 3 次）": "Coffee (at least 3 times per week)", "茶（每週至少 3 次）": "Tea (at least 3 times per week)", "素食（以蔬食為主）": "Vegetarian or mostly plant-based", "無固定或少量": "No fixed pattern or small amount",
       "是，每天飲用": "Yes, daily", "否，偶爾或不飲用": "No, occasional or none", "是，每週 3 次以上": "Yes, at least 3 times per week", "否，較少食用": "No, rarely", "否，較少補充": "No, rarely",
-      "是，曾罹癌": "Yes, had cancer",
+      "是，目前正在治療或追蹤中": "Yes, currently under treatment or follow-up",
+      "是，過去曾被診斷，目前已完成治療或追蹤": "Yes, diagnosed in the past; treatment or follow-up has been completed",
+      "否，未曾被診斷為癌症": "No, never diagnosed with cancer",
       "高血壓": "Hypertension", "糖尿病／高血糖": "Diabetes / high blood glucose", "高血脂／高膽固醇": "Hyperlipidemia / high cholesterol", "肝病（B 型肝炎／C 型肝炎／肝硬化）": "Liver disease (HBV / HCV / cirrhosis)", "胃食道逆流": "Gastroesophageal reflux disease", "心臟病／心律不整": "Heart disease / arrhythmia", "甲狀腺疾病": "Thyroid disease", "氣喘／慢性肺阻塞（COPD）": "Asthma / COPD", "痛風／高尿酸": "Gout / high uric acid", "關節炎（含類風濕性）": "Arthritis (including rheumatoid arthritis)", "憂鬱症／焦慮症": "Depression / anxiety", "中風病史": "History of stroke", "腎臟病／洗腎": "Kidney disease / dialysis", "自體免疫疾病（乾燥症、紅斑性狼瘡等）": "Autoimmune disease", "以上皆無": "None of the above", "其他慢性疾病": "Other chronic disease",
       "乳癌": "Breast cancer", "攝護腺癌": "Prostate cancer", "肺癌": "Lung cancer", "頭頸癌": "Head and neck cancer", "胰臟癌": "Pancreatic cancer", "肝癌": "Liver cancer", "大腸直腸癌": "Colorectal cancer", "胃癌": "Stomach cancer", "子宮內膜癌": "Endometrial cancer", "膀胱癌": "Bladder cancer", "腎癌": "Kidney cancer", "其他癌種": "Other cancer type"
     }
@@ -533,6 +547,14 @@ function renderConsentNotice() {
   if (currentLang === "en") {
     return `
       <section class="consent-notice" aria-labelledby="consentNoticeTitle">
+        <div class="consent-step-guide" aria-label="${i18n.en.ui.consentStepsTitle}">
+          <strong>${i18n.en.ui.consentStepsTitle}</strong>
+          <ol>
+            <li>${i18n.en.ui.consentStep1}</li>
+            <li>${i18n.en.ui.consentStep2}</li>
+            <li>${i18n.en.ui.consentStep3}</li>
+          </ol>
+        </div>
         <div class="consent-notice__section">
           <h3 id="consentNoticeTitle">Personal Data Protection Notice</h3>
           <dl>
@@ -557,6 +579,14 @@ function renderConsentNotice() {
   }
   return `
     <section class="consent-notice" aria-labelledby="consentNoticeTitle">
+      <div class="consent-step-guide" aria-label="本頁操作方式">
+        <strong>請依照以下 3 個步驟完成知情同意</strong>
+        <ol>
+          <li>先閱讀下方告知事項</li>
+          <li>閱讀後按下大型按鈕</li>
+          <li>勾選三個確認項目，再繼續填寫</li>
+        </ol>
+      </div>
       <div class="consent-notice__section">
         <h3 id="consentNoticeTitle">個人資料保護告知事項</h3>
         <dl>
@@ -611,6 +641,7 @@ function renderQuestion() {
 
   renderModules();
   inputZone.hidden = false;
+  inputZone.classList.toggle("input-zone--consent", question.id === "consent_acknowledgement");
   panelFooter.hidden = false;
   skipBtn.hidden = !question.required || question.id === "consent_acknowledgement";
   skipBtn.disabled = question.id === "consent_acknowledgement";
@@ -643,6 +674,7 @@ function renderQuestion() {
 function setupConsentGate(question) {
   if (question.id !== "consent_acknowledgement") return;
   const unlockButton = document.querySelector("#unlockConsentBtn");
+  const optionHint = document.querySelector("#consentOptionHint");
   const updateConsentControls = () => {
     document.querySelectorAll(".option-button").forEach((button) => {
       button.disabled = !consentNoticeRead;
@@ -650,15 +682,24 @@ function setupConsentGate(question) {
     });
     const saveButton = document.querySelector("#saveMultiBtn");
     if (saveButton) saveButton.disabled = !consentNoticeRead;
+    if (optionHint) {
+      optionHint.textContent = consentNoticeRead
+        ? (currentLang === "en" ? i18n.en.ui.consentOptionsReady : "現在請勾選下方三個確認項目。三項都勾選後，再按「三項都已勾選，繼續填寫」。")
+        : (currentLang === "en" ? i18n.en.ui.consentOptionsLocked : "下方三個確認項目目前尚未開啟。請先閱讀上方告知事項，並按下「我已閱讀，開始勾選同意事項」。");
+      optionHint.classList.toggle("is-ready", consentNoticeRead);
+    }
     if (unlockButton) {
       unlockButton.disabled = consentNoticeRead;
-      unlockButton.textContent = consentNoticeRead ? ui("consentUnlocked") : ui("consentUnlock");
+      unlockButton.textContent = consentNoticeRead
+        ? ui("consentUnlocked")
+        : (currentLang === "en" ? ui("consentUnlock") : "我已閱讀，開始勾選同意事項");
     }
   };
   updateConsentControls();
   unlockButton?.addEventListener("click", () => {
     consentNoticeRead = true;
     updateConsentControls();
+    document.querySelector("#consentOptionHint")?.scrollIntoView({ behavior: "smooth", block: "center" });
   });
 }
 
@@ -794,13 +835,15 @@ function renderQuickInput(question) {
   }
 
   if (question.type === "multi") {
+    const isConsentQuestion = question.id === "consent_acknowledgement";
     quickOptions.innerHTML = `
+      ${isConsentQuestion ? `<div class="consent-option-hint" id="consentOptionHint"></div>` : ""}
       <div class="multi-options">
         ${question.options.map((option) => `
-          <button class="option-button option-button--multi" type="button" data-value="${option}" aria-pressed="false">${tx(option)}</button>
+          <button class="option-button option-button--multi${isConsentQuestion ? " option-button--consent" : ""}" type="button" data-value="${option}" aria-pressed="false">${tx(option)}</button>
         `).join("")}
       </div>
-      <button class="secondary-action" id="saveMultiBtn" type="button">${ui("saveContinue")}</button>
+      <button class="secondary-action" id="saveMultiBtn" type="button">${isConsentQuestion ? (currentLang === "en" ? i18n.en.ui.consentContinue : "三項都已勾選，繼續填寫") : ui("saveContinue")}</button>
     `;
 
     quickOptions.querySelectorAll(".option-button--multi").forEach((button) => {
@@ -873,13 +916,17 @@ function renderConfirmation() {
     </li>
   `).join("");
   sectionTitle.textContent = currentLang === "en" ? i18n.en.ui.confirmSection : "資料確認";
-  sectionSummary.textContent = currentLang === "en" ? i18n.en.ui.confirmSummary : "請確認以下填答內容是否正確。";
-  guideMessage.textContent = currentLang === "en" ? i18n.en.ui.confirmGuide : "以下是您本次填寫的題目與答案。請確認內容無誤後送出。";
+  sectionSummary.textContent = currentLang === "en" ? i18n.en.ui.confirmSummary : "目前資料尚未送出。請確認所有填答答案後，按下頁面下方按鈕才會完成送出。";
+  guideMessage.textContent = currentLang === "en" ? i18n.en.ui.confirmGuide : "這是最後確認步驟。請逐項檢查本次填寫的題目與答案，確認無誤後按下送出按鈕，資料才會送出。";
 
   questionArea.innerHTML = `
     <div class="confirm-panel">
       ${moduleFeedback ? `<p class="module-feedback">${moduleFeedback}</p>` : ""}
       <h2 class="question-title">${currentLang === "en" ? i18n.en.ui.confirmTitle : "請確認您的填答內容"}</h2>
+      <div class="confirm-submit-notice" role="status">
+        <strong>${currentLang === "en" ? i18n.en.ui.confirmPendingTitle : "目前尚未送出"}</strong>
+        <p>${currentLang === "en" ? i18n.en.ui.confirmPendingBody : "請先逐項確認本頁所有答案。確認內容正確後，請按最下方「我已確認所有答案，送出資料」按鈕，系統才會正式送出您的資料。"}</p>
+      </div>
       <div class="answer-review-list">
         ${Object.values(answers).map((entry) => `
           <div class="answer-review-item">
@@ -889,7 +936,7 @@ function renderConfirmation() {
         `).join("")}
       </div>
       <div class="result-actions">
-        <button class="secondary-action" id="runModelBtn" type="button">${currentLang === "en" ? i18n.en.ui.submitReview : "確認並送出"}</button>
+        <button class="secondary-action" id="runModelBtn" type="button">${currentLang === "en" ? i18n.en.ui.submitFinal : "我已確認所有答案，送出資料"}</button>
       </div>
     </div>
   `;
@@ -920,6 +967,14 @@ function boolFromYesNo(value) {
   if (value === "是" || String(value || "").startsWith("是，")) return 1;
   if (value === "否" || String(value || "").startsWith("否，")) return 0;
   return 0;
+}
+
+function isPersonalCancerYes(value) {
+  return String(value || "").startsWith("是，");
+}
+
+function isCurrentCancerPatient(value) {
+  return String(value || "").includes("目前正在");
 }
 
 function hasSelected(field, keyword) {
@@ -972,6 +1027,7 @@ function buildOptimizedFeatureRow() {
   const depression = getAnswerValue(answers, "mental_health.weekly_low_mood_frequency");
   const pregnancyCount = normalizeNumber(getAnswerValue(answers, "female_health.pregnancy_count"));
   const birthCount = normalizeNumber(getAnswerValue(answers, "female_health.live_birth_count"));
+  const personalCancerHistory = getAnswerValue(answers, "medical_history.personal_cancer_history");
   const row = {
     record_id: `WEB-${Date.now()}`,
     sex: sex === "女性" ? 1 : 0,
@@ -980,8 +1036,8 @@ function buildOptimizedFeatureRow() {
     weight_kg: normalizeNumber(getAnswerValue(answers, "demographics.weight_kg")),
     bmi: calculateBmi(),
     diagnosis: "尚未診斷",
-    is_cancer_patient: 0,
-    prev_cancer: getAnswerValue(answers, "medical_history.personal_cancer_history") === "是，曾罹癌" ? 1 : 0,
+    is_cancer_patient: isCurrentCancerPatient(personalCancerHistory) ? 1 : 0,
+    prev_cancer: isPersonalCancerYes(personalCancerHistory) ? 1 : 0,
     family_cancer_history: boolFromYesNo(getAnswerValue(answers, "family_history.has_cancer_history")),
     first_degree_relative_cancer: boolFromYesNo(getAnswerValue(answers, "family_history.has_cancer_history")),
     chronic_hypertension: hasSelected("medical_history.chronic_conditions", "高血壓") ? 1 : 0,
@@ -1099,8 +1155,12 @@ function buildSubmissionRows() {
 
 function buildExcelRow(optimizedFeatureRow, submittedAt) {
   const symptomEntry = Object.values(answers).find((entry) => entry.field === "recent_health.recent_discomfort");
+  const personalCancerTypeEntry = Object.values(answers).find((entry) => entry.field === "medical_history.personal_cancer_types");
   const structured = symptomEntry?.structured || {};
   const join = (value) => Array.isArray(value) ? value.join("; ") : "";
+  const personalCancerTypes = personalCancerTypeEntry?.value
+    ? (Array.isArray(personalCancerTypeEntry.value) ? personalCancerTypeEntry.value.join("; ") : String(personalCancerTypeEntry.value))
+    : "";
 
   return {
     ...optimizedFeatureRow,
@@ -1108,6 +1168,7 @@ function buildExcelRow(optimizedFeatureRow, submittedAt) {
     email: getAnswerValue(answers, "contact.email") || "",
     language: currentLang,
     report_language: currentLang === "en" ? "en" : "zh-Hant",
+    personal_cancer_types: personalCancerTypes,
     recent_discomfort_text: symptomEntry?.value ? String(symptomEntry.value) : "",
     recent_discomfort_no_symptom: structured.no_symptom === true ? 1 : 0,
     recent_discomfort_body_parts: join(structured.body_parts),
@@ -1120,10 +1181,20 @@ function buildExcelRow(optimizedFeatureRow, submittedAt) {
   };
 }
 
+function buildAiApiFeatureRow(optimizedFeatureRow) {
+  return {
+    ...optimizedFeatureRow,
+    // AI API schema currently rejects negative quit_smoking values.
+    // Keep raw modeling/storage features in optimized_feature_row and excel_row.
+    quit_smoking: Math.max(0, normalizeNumber(optimizedFeatureRow.quit_smoking) ?? 0)
+  };
+}
+
 function storeSubmissionForIntegration() {
   const submittedAt = new Date().toISOString();
   const rows = buildSubmissionRows();
   const optimizedFeatureRow = buildOptimizedFeatureRow();
+  const aiApiFeatureRow = buildAiApiFeatureRow(optimizedFeatureRow);
   const missingColumns = optimizedFeatureColumns.filter((column) => optimizedFeatureRow[column] === "" && column !== "score");
   const submission = {
     submitted_at: submittedAt,
@@ -1133,6 +1204,7 @@ function storeSubmissionForIntegration() {
     rows,
     optimized_feature_columns: optimizedFeatureColumns,
     optimized_feature_row: optimizedFeatureRow,
+    ai_api_feature_row: aiApiFeatureRow,
     excel_row: buildExcelRow(optimizedFeatureRow, submittedAt),
     data_quality: {
       missing_columns: missingColumns,
@@ -1233,6 +1305,7 @@ async function renderResult() {
         schema_version: "10Cancer_AI_structure_data_v1_compatible",
         columns: submission.optimized_feature_columns,
         row: submission.optimized_feature_row,
+        ai_api_row: submission.ai_api_feature_row,
         data_quality: submission.data_quality
       })}</script>
     </div>
