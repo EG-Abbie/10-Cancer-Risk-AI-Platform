@@ -83,8 +83,8 @@ const questions = [
 const i18n = {
   en: {
     ui: {
-      appTitle: "AI Interactive Cancer Risk Assessment",
-      heroTitle: "AI Interactive Cancer Risk Assessment",
+      appTitle: "AI Ten-Cancer Health Risk Factor Assessment",
+      heroTitle: "AI Ten-Cancer Health Risk Factor Assessment",
       heroSubtitle: "Complete a 5-8 minute guided health exploration to understand your cancer-related risk factor profile.",
       trust1: "Not a medical diagnosis",
       trust2: "Submit only after review",
