@@ -479,11 +479,32 @@ html[lang="en"] h1 {
   line-height: 1.65;
 }
 
+.validation-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.65fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.validation-group {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(4, 30, 30, 0.16);
+}
+
+.validation-group__label {
+  margin: 0 0 9px;
+  color: #d7e8e3;
+  font-size: 12px;
+  font-weight: 900;
+}
+
 .validation-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  margin-top: 16px;
 }
 
 .validation-metric {
@@ -514,9 +535,8 @@ html[lang="en"] h1 {
 
 .validation-scope {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .validation-scope div {
@@ -1668,6 +1688,19 @@ pre {
 
   .validation-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .validation-card__body {
+    grid-template-columns: 1fr;
+  }
+
+  .validation-group {
+    border-color: var(--line);
+    background: #fff;
+  }
+
+  .validation-group__label {
+    color: var(--teal-deep);
   }
 
   .validation-metric {
