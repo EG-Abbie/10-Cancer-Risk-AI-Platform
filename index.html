@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AI十大癌症健康風險因子評估</title>
-    <link rel="stylesheet" href="styles.css?v=20260714-validation-card-v2" />
+    <link rel="stylesheet" href="styles.css?v=20260714-validation-card-v3" />
   </head>
   <body>
     <main class="app-shell">
@@ -52,6 +52,25 @@
                     <strong>98.1%</strong>
                     <span id="metricSensitivity">敏感度</span>
                     <small id="metricSensitivityNote">在既定設定下降低遺漏個案的能力</small>
+                  </div>
+                </div>
+              </div>
+              <div class="validation-group validation-group--evidence">
+                <p class="validation-group__label" id="validationEvidenceLabel">研究基礎</p>
+                <div class="validation-evidence">
+                  <div class="validation-evidence__item">
+                    <strong>1,227</strong>
+                    <div>
+                      <span id="trainingDatasetLabel">筆合併訓練資料</span>
+                      <small id="trainingDatasetNote">涵蓋 10 種癌症與健康對照</small>
+                    </div>
+                  </div>
+                  <div class="validation-evidence__item">
+                    <strong>1,440</strong>
+                    <div>
+                      <span id="modelTrainingLabel">次模型訓練</span>
+                      <small id="modelTrainingNote">用於模型比較與最佳化</small>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -176,6 +195,6 @@
       </footer>
     </main>
 
-    <script src="app.js?v=20260714-validation-card-v2"></script>
+    <script src="app.js?v=20260714-validation-card-v3"></script>
   </body>
 </html>

@@ -96,10 +96,15 @@ const i18n = {
       validationTitle: "How was the model evaluated?",
       validationIntro: "In the current research data, the overall model demonstrated the ability to rank and distinguish different risk factor profiles.",
       validationPerformanceLabel: "Research performance",
+      validationEvidenceLabel: "Research foundation",
       validationScopeLabel: "Assessment framework",
       metricAucNote: "Risk ranking and discrimination ability",
       metricSensitivity: "Sensitivity",
       metricSensitivityNote: "Ability to reduce missed cases under the selected setting",
+      trainingDatasetLabel: "combined training records",
+      trainingDatasetNote: "Covering 10 cancer types and healthy controls",
+      modelTrainingLabel: "model training runs",
+      modelTrainingNote: "Used for model comparison and optimization",
       assessmentItemLabel: "Assessment items",
       modelFeatureLabel: "Model features",
       validationNote: "These are model results from internal PoC research data under a defined decision setting. They are not an individual's probability of developing cancer or the accuracy of each personal report.",
@@ -391,10 +396,15 @@ function applyStaticText() {
   document.querySelector("#validationTitle").textContent = currentLang === "en" ? i18n.en.ui.validationTitle : "模型如何被評估？";
   document.querySelector("#validationIntro").textContent = currentLang === "en" ? i18n.en.ui.validationIntro : "整體模型在目前研究資料中，展現對不同風險因子組合的排序與區分能力。";
   document.querySelector("#validationPerformanceLabel").textContent = currentLang === "en" ? i18n.en.ui.validationPerformanceLabel : "研究表現";
+  document.querySelector("#validationEvidenceLabel").textContent = currentLang === "en" ? i18n.en.ui.validationEvidenceLabel : "研究基礎";
   document.querySelector("#validationScopeLabel").textContent = currentLang === "en" ? i18n.en.ui.validationScopeLabel : "評估架構";
   document.querySelector("#metricAucNote").textContent = currentLang === "en" ? i18n.en.ui.metricAucNote : "風險排序與區分能力";
   document.querySelector("#metricSensitivity").textContent = currentLang === "en" ? i18n.en.ui.metricSensitivity : "敏感度";
   document.querySelector("#metricSensitivityNote").textContent = currentLang === "en" ? i18n.en.ui.metricSensitivityNote : "在既定設定下降低遺漏個案的能力";
+  document.querySelector("#trainingDatasetLabel").textContent = currentLang === "en" ? i18n.en.ui.trainingDatasetLabel : "筆合併訓練資料";
+  document.querySelector("#trainingDatasetNote").textContent = currentLang === "en" ? i18n.en.ui.trainingDatasetNote : "涵蓋 10 種癌症與健康對照";
+  document.querySelector("#modelTrainingLabel").textContent = currentLang === "en" ? i18n.en.ui.modelTrainingLabel : "次模型訓練";
+  document.querySelector("#modelTrainingNote").textContent = currentLang === "en" ? i18n.en.ui.modelTrainingNote : "用於模型比較與最佳化";
   document.querySelector("#assessmentItemLabel").textContent = currentLang === "en" ? i18n.en.ui.assessmentItemLabel : "評估項目";
   document.querySelector("#modelFeatureLabel").textContent = currentLang === "en" ? i18n.en.ui.modelFeatureLabel : "模型特徵";
   document.querySelector("#validationNote").textContent = currentLang === "en" ? i18n.en.ui.validationNote : "以上為內部 PoC 研究資料與既定判定設定下的模型表現，不是個人罹癌機率，也不代表每份個人報告的準確率。";
