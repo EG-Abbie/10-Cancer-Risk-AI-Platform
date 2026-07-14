@@ -1,5 +1,8 @@
 const SUBMISSION_ENDPOINT = "/api/submit";
 
+const zhMedicalDisclaimer = "本服務依據使用者自行填寫的年齡、生活型態、家族史、既往病史及其他健康資訊，運用統計與人工智慧方法，提供癌症相關風險因子的個人化整理與健康教育資訊。本結果不代表罹患癌症的機率，不用於癌症診斷、篩檢、早期偵測、疾病預測或治療決策，亦不能取代醫師評估或任何標準醫療檢查。";
+const enMedicalDisclaimer = "This service uses statistical and artificial intelligence methods based on age, lifestyle, family history, past medical history, and other health information self-reported by the user to provide personalized organization of cancer-related risk factors and health education information. The result does not represent the probability of developing cancer and is not intended for cancer diagnosis, screening, early detection, disease prediction, or treatment decision-making. It also cannot replace a physician’s evaluation or any standard medical examination.";
+
 const modules = [
   { id: "consent", title: "知情同意", summary: "先確認個資告知與非診斷性質。" },
   { id: "basic", title: "基本資料", summary: "收集年齡、身高體重、運動與性別等基本資訊。" },
@@ -16,7 +19,7 @@ const modules = [
 const consentOptions = [
   "我已閱讀並同意個人資料保護告知事項，同意愛立基生醫股份有限公司依所述目的收集、處理及利用我的個人資料。",
   "我了解本評估結果的準確度受限於數據庫與演算法，若風險不高不代表沒有風險，若風險較高也不代表已罹病。",
-  "我了解本評估結果僅供個人健康參考，不構成醫療診斷，如有疑慮應諮詢醫師。"
+  "我了解本服務僅提供癌症相關風險因子的個人化整理與健康教育資訊；結果不代表罹患癌症的機率，不用於癌症診斷、篩檢、早期偵測、疾病預測或治療決策，亦不能取代醫師評估或任何標準醫療檢查。"
 ];
 
 const cancerOptions = ["乳癌", "攝護腺癌", "肺癌", "頭頸癌", "胰臟癌", "肝癌", "大腸直腸癌", "胃癌", "子宮內膜癌", "膀胱癌", "腎癌", "其他癌種"];
@@ -28,7 +31,7 @@ const questions = [
     type: "multi",
     required: true,
     title: "在開始填寫前，請確認您已閱讀並同意以下事項",
-    note: "本平台收集基本資料、生活習慣、健康資訊與病史資料，用於癌症風險評估與健康管理參考；結果不構成醫療診斷。",
+    note: zhMedicalDisclaimer,
     field: "consent.acknowledgement",
     options: consentOptions,
     minSelected: 3
@@ -87,7 +90,7 @@ const i18n = {
       trust2: "Submit only after review",
       trust3: "Receive a personalized summary",
       start: "Start Assessment",
-      disclaimer: "This result is for health education and self-management reference only. It is not a medical diagnosis, screening result, or treatment recommendation.",
+      disclaimer: enMedicalDisclaimer,
       currentSection: "Current Section",
       quick: "Quick Options",
       text: "Text Answer",
@@ -190,7 +193,7 @@ const i18n = {
       "疲倦或睡眠受影響": "Fatigue or sleep affected"
     },
     questions: {
-      consent_acknowledgement: ["Before starting, please confirm that you have read and agree to the following items", "This platform collects basic information, lifestyle habits, health information, and medical history for cancer risk assessment and health management reference. The result is not a medical diagnosis."],
+      consent_acknowledgement: ["Before starting, please confirm that you have read and agree to the following items", enMedicalDisclaimer],
       birth_year: ["Year of birth", "Please enter a 4-digit year, for example 1980.", "Enter your answer"],
       height_cm: ["Height (cm)", "Please enter your current height.", "For example, 165"],
       weight_kg: ["Weight (kg)", "Please enter your current weight.", "For example, 60"],
@@ -231,7 +234,7 @@ const i18n = {
     options: {
       "我已閱讀並同意個人資料保護告知事項，同意愛立基生醫股份有限公司依所述目的收集、處理及利用我的個人資料。": "I have read and agree to the personal data protection notice, and consent to EG BioMed Co. Ltd. collecting, processing, and using my personal data for the stated purposes.",
       "我了解本評估結果的準確度受限於數據庫與演算法，若風險不高不代表沒有風險，若風險較高也不代表已罹病。": "I understand that the accuracy of this assessment is limited by the database and algorithm. A lower risk does not mean no risk, and a higher risk does not mean I have cancer.",
-      "我了解本評估結果僅供個人健康參考，不構成醫療診斷，如有疑慮應諮詢醫師。": "I understand that this result is for personal health reference only and is not a medical diagnosis. If I have concerns, I should consult a physician.",
+      "我了解本服務僅提供癌症相關風險因子的個人化整理與健康教育資訊；結果不代表罹患癌症的機率，不用於癌症診斷、篩檢、早期偵測、疾病預測或治療決策，亦不能取代醫師評估或任何標準醫療檢查。": "I understand that this service only provides personalized organization of cancer-related risk factors and health education information. The result does not represent the probability of developing cancer, is not used for cancer diagnosis, screening, early detection, disease prediction, or treatment decision-making, and cannot replace a physician’s evaluation or any standard medical examination.",
       "是": "Yes", "否": "No", "不確定": "Not sure", "不清楚": "Not sure",
       "男性": "Male", "女性": "Female",
       "幾乎不運動": "Almost no exercise", "30-60 分鐘": "30-60 minutes", "1-2 小時": "1-2 hours", "多於 2 小時": "More than 2 hours",
@@ -367,7 +370,7 @@ function applyStaticText() {
   const trustCopy = currentLang === "en" ? [i18n.en.ui.trust1, i18n.en.ui.trust2, i18n.en.ui.trust3] : ["非醫療診斷", "資料確認後才送出", "完成後取得個人化摘要"];
   trustItems.forEach((item, index) => { item.textContent = trustCopy[index]; });
   startBtn.textContent = currentLang === "en" ? i18n.en.ui.start : "開始互動評估";
-  document.querySelector(".disclaimer").textContent = currentLang === "en" ? i18n.en.ui.disclaimer : "本結果僅供健康教育與自我健康管理參考，不構成醫療診斷、疾病篩檢結果或治療建議。";
+  document.querySelector(".disclaimer").textContent = currentLang === "en" ? i18n.en.ui.disclaimer : zhMedicalDisclaimer;
   document.querySelector(".progress-panel .eyebrow").textContent = currentLang === "en" ? i18n.en.ui.currentSection : "目前章節";
   document.querySelector('[data-mode="quick"]').textContent = currentLang === "en" ? i18n.en.ui.quick : "快速選項";
   document.querySelector('[data-mode="text"]').textContent = currentLang === "en" ? i18n.en.ui.text : "文字回答";
@@ -565,7 +568,7 @@ function renderConsentNotice() {
         <div class="consent-notice__section consent-notice__section--warning">
           <h3>Accuracy Notice and Honest Response Requirement</h3>
           <p>AI model performance on the training validation set: overall cancer risk identification AUC = 0.966, sensitivity 98.1%; cancer-specific model AUC ranges from 0.876 to 1.000.</p>
-          <p><strong>Important:</strong> The accuracy of this assessment depends heavily on honest answers. If you provide false, careless, omitted, or exaggerated symptoms or medical history, the AI model may be unable to generate a valid risk assessment. The company is not responsible for assessment deviations caused by inaccurate responses. Even with honest answers, statistical models still have a range of prediction error (false positives and false negatives). This result is not a medical diagnosis and cannot replace professional clinical judgment.</p>
+          <p><strong>Important:</strong> The accuracy of this assessment depends heavily on honest answers. If you provide false, careless, omitted, or exaggerated symptoms or medical history, the AI model may be unable to generate a valid risk assessment. The company is not responsible for assessment deviations caused by inaccurate responses. Even with honest answers, statistical models still have a range of prediction error (false positives and false negatives). ${enMedicalDisclaimer}</p>
         </div>
         <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">${i18n.en.ui.consentUnlock}</button>
       </section>
@@ -597,7 +600,7 @@ function renderConsentNotice() {
       <div class="consent-notice__section consent-notice__section--warning">
         <h3>準確度說明與誠實填答要求</h3>
         <p>本平台 AI 模型效能（訓練驗證集）：整體癌症風險辨識 AUC = 0.966、敏感度 98.1% - 各癌種個別模型 AUC 介於 0.876 至 1.000</p>
-        <p><strong>重要：</strong>本評估結果的準確度高度依賴您的誠實填答。若您填寫不實、隨意作答、故意省略或誇大任何症狀及病史，AI 模型將因輸入資料失真而無法產生有效的風險評估。本公司對因不實填答所導致之評估結果偏差，不負任何責任。即便誠實填答，統計模型仍存在一定範圍之預測誤差（假陽性與假陰性），本結果不構成醫療診斷，不能取代臨床醫師之專業判斷。</p>
+        <p><strong>重要：</strong>本評估結果的準確度高度依賴您的誠實填答。若您填寫不實、隨意作答、故意省略或誇大任何症狀及病史，AI 模型將因輸入資料失真而無法產生有效的風險評估。本公司對因不實填答所導致之評估結果偏差，不負任何責任。即便誠實填答，統計模型仍存在一定範圍之預測誤差（假陽性與假陰性）。${zhMedicalDisclaimer}</p>
       </div>
       <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">我已閱讀上述告知事項</button>
     </section>
@@ -1293,7 +1296,7 @@ async function renderResult() {
       <h2 class="question-title">${currentLang === "en" ? i18n.en.ui.completedTitle : "感謝您的填答"}</h2>
       <p class="question-note">${currentLang === "en" ? `${i18n.en.ui.completedNote} ${submission.email}.` : `本次健康探索已完成，您的結果已寄送至 ${submission.email}。`}</p>
       <p class="question-note">${currentLang === "en" ? i18n.en.ui.completedInbox : "請留意信箱收件匣與垃圾郵件匣。"}</p>
-      <p class="disclaimer question-note">${currentLang === "en" ? i18n.en.ui.disclaimer : "本評估結果僅供健康教育與自我健康管理參考，不代表醫療診斷、疾病篩檢結果或治療建議。"}</p>
+      <p class="disclaimer question-note">${currentLang === "en" ? i18n.en.ui.disclaimer : zhMedicalDisclaimer}</p>
       <script type="application/json" id="submissionRowsJson">${safeJsonForHtml(submission.rows)}</script>
       <script type="application/json" id="structuredFeaturesJson">${safeJsonForHtml({
         schema_version: "10Cancer_AI_structure_data_v1_compatible",
