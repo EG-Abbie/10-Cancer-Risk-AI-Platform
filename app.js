@@ -1,7 +1,7 @@
 const SUBMISSION_ENDPOINT = "/api/submit";
 
-const zhMedicalDisclaimer = "本服務依據使用者自行填寫的年齡、生活型態、家族史、既往病史及其他健康資訊，運用統計與人工智慧方法，提供癌症相關風險因子的個人化整理與健康教育資訊。本結果不代表罹患癌症的機率，不用於癌症診斷、篩檢、早期偵測、疾病預測或治療決策，亦不能取代醫師評估或任何標準醫療檢查。";
-const enMedicalDisclaimer = "This service uses statistical and artificial intelligence methods based on age, lifestyle, family history, past medical history, and other health information self-reported by the user to provide personalized organization of cancer-related risk factors and health education information. The result does not represent the probability of developing cancer and is not intended for cancer diagnosis, screening, early detection, disease prediction, or treatment decision-making. It also cannot replace a physician’s evaluation or any standard medical examination.";
+const zhShortServiceNote = "將您的生活習慣、病史與家族史整理成個人化癌症相關健康風險因子摘要。本服務不作為疾病診斷或篩檢。";
+const enShortServiceNote = "Receive a personalized summary of cancer-related health risk factors based on your lifestyle, medical history, and family history. This service is not a medical diagnosis or screening test.";
 
 const modules = [
   { id: "consent", title: "知情同意", summary: "先確認個資告知與非診斷性質。" },
@@ -31,7 +31,7 @@ const questions = [
     type: "multi",
     required: true,
     title: "在開始填寫前，請確認您已閱讀並同意以下事項",
-    note: zhMedicalDisclaimer,
+    note: "請先閱讀個人資料告知與服務說明，再完成下方三項確認。",
     field: "consent.acknowledgement",
     options: consentOptions,
     minSelected: 3
@@ -86,11 +86,12 @@ const i18n = {
       appTitle: "AI Ten-Cancer Health Risk Factor Assessment",
       heroTitle: "AI Ten-Cancer Health Risk Factor Assessment",
       heroSubtitle: "Complete a 5-8 minute guided health exploration to understand your cancer-related risk factor profile.",
-      trust1: "Not a medical diagnosis",
+      trust1: "Personalized factor summary",
       trust2: "Submit only after review",
-      trust3: "Receive a personalized summary",
+      trust3: "Bilingual email report",
       start: "Start Assessment",
-      disclaimer: enMedicalDisclaimer,
+      disclaimer: enShortServiceNote,
+      serviceInfo: "View full service information",
       currentSection: "Current Section",
       quick: "Quick Options",
       text: "Text Answer",
@@ -126,6 +127,7 @@ const i18n = {
       completedTitle: "Thank you for completing the assessment",
       completedNote: "This health exploration is complete. Your results have been sent to",
       completedInbox: "Please check your inbox and spam folder.",
+      completedServiceInfo: "About the report and service limitations",
       required: "Please enter your answer. If you have had no physical discomfort in the past three months, please enter \"None\".",
       invalidEmail: "Please enter a valid email address.",
       numberRequired: "Please enter a number, or use \"Not sure how to answer\".",
@@ -193,7 +195,7 @@ const i18n = {
       "疲倦或睡眠受影響": "Fatigue or sleep affected"
     },
     questions: {
-      consent_acknowledgement: ["Before starting, please confirm that you have read and agree to the following items", enMedicalDisclaimer],
+      consent_acknowledgement: ["Before starting, please confirm that you have read and agree to the following items", "Please read the personal data notice and service information before completing the three confirmations below."],
       birth_year: ["Year of birth", "Please enter a 4-digit year, for example 1980.", "Enter your answer"],
       height_cm: ["Height (cm)", "Please enter your current height.", "For example, 165"],
       weight_kg: ["Weight (kg)", "Please enter your current weight.", "For example, 60"],
@@ -308,6 +310,7 @@ const inputZone = document.querySelector("#inputZone");
 const panelFooter = document.querySelector(".panel-footer");
 const guideStage = document.querySelector("#guideStage");
 const languageButtons = document.querySelectorAll(".language-switcher__button");
+const serviceDetails = document.querySelector("#serviceDetails");
 
 const zhUi = {
   guideIntro: "接下來我會用幾個簡單問題，幫你整理和癌症風險相關的生活習慣、家族史與健康狀況。",
@@ -367,10 +370,18 @@ function applyStaticText() {
   document.querySelector("#hero-title").textContent = currentLang === "en" ? i18n.en.ui.heroTitle : "AI十大癌症健康風險因子評估";
   document.querySelector(".hero__subtitle").textContent = currentLang === "en" ? i18n.en.ui.heroSubtitle : "透過 5-8 分鐘的互動問答，了解與你相關的癌症風險因子組合。";
   const trustItems = document.querySelectorAll(".trust-strip span");
-  const trustCopy = currentLang === "en" ? [i18n.en.ui.trust1, i18n.en.ui.trust2, i18n.en.ui.trust3] : ["非醫療診斷", "資料確認後才送出", "完成後取得個人化摘要"];
+  const trustCopy = currentLang === "en" ? [i18n.en.ui.trust1, i18n.en.ui.trust2, i18n.en.ui.trust3] : ["個人化因子整理", "資料確認後才送出", "中英文 Email 報告"];
   trustItems.forEach((item, index) => { item.textContent = trustCopy[index]; });
   startBtn.textContent = currentLang === "en" ? i18n.en.ui.start : "開始互動評估";
-  document.querySelector(".disclaimer").textContent = currentLang === "en" ? i18n.en.ui.disclaimer : zhMedicalDisclaimer;
+  document.querySelector(".disclaimer").textContent = currentLang === "en" ? i18n.en.ui.disclaimer : zhShortServiceNote;
+  document.querySelector("#heroServiceInfoBtn").textContent = currentLang === "en" ? i18n.en.ui.serviceInfo : "查看完整服務說明";
+  document.querySelector("#footerSummary").textContent = currentLang === "en"
+    ? "Personalized organization of cancer-related health risk factors and health education information."
+    : "個人化癌症相關健康風險因子整理與健康教育資訊。";
+  document.querySelector("#serviceDetailsSummary").textContent = currentLang === "en" ? "Service information and limitations" : "服務說明與使用限制";
+  document.querySelectorAll("[data-service-copy]").forEach((copy) => {
+    copy.hidden = copy.dataset.serviceCopy !== currentLang;
+  });
   document.querySelector(".progress-panel .eyebrow").textContent = currentLang === "en" ? i18n.en.ui.currentSection : "目前章節";
   document.querySelector('[data-mode="quick"]').textContent = currentLang === "en" ? i18n.en.ui.quick : "快速選項";
   document.querySelector('[data-mode="text"]').textContent = currentLang === "en" ? i18n.en.ui.text : "文字回答";
@@ -556,8 +567,8 @@ function renderConsentNotice() {
           <h3 id="consentNoticeTitle">Personal Data Protection Notice</h3>
           <dl>
             <div><dt>Collector</dt><dd>EG BioMed Co. Ltd.</dd></div>
-            <div><dt>Purpose</dt><dd>AI cancer risk assessment research, personalized risk report generation, and model training validation</dd></div>
-            <div><dt>Data categories</dt><dd>Basic information (age, sex, height, weight), health information (medical history, family history, lifestyle habits, clinical symptoms), and email</dd></div>
+            <div><dt>Purpose</dt><dd>Cancer-related health risk factor research, personalized health information summary generation, and model training validation</dd></div>
+            <div><dt>Data categories</dt><dd>Basic information (age, sex, height, weight), health information (medical history, family history, and lifestyle habits), and email</dd></div>
             <div><dt>Storage</dt><dd>Microsoft cloud servers in the United States, compliant with GDPR and SOC 2 Type II security standards</dd></div>
             <div><dt>Retention</dt><dd>5 years from the date of completion, then destroyed or de-identified</dd></div>
             <div><dt>Users</dt><dd>Our research team. Data will not be sold or provided to third parties for commercial purposes.</dd></div>
@@ -566,9 +577,10 @@ function renderConsentNotice() {
           </dl>
         </div>
         <div class="consent-notice__section consent-notice__section--warning">
-          <h3>Accuracy Notice and Honest Response Requirement</h3>
-          <p>AI model performance on the training validation set: overall cancer risk identification AUC = 0.966, sensitivity 98.1%; cancer-specific model AUC ranges from 0.876 to 1.000.</p>
-          <p><strong>Important:</strong> The accuracy of this assessment depends heavily on honest answers. If you provide false, careless, omitted, or exaggerated symptoms or medical history, the AI model may be unable to generate a valid risk assessment. The company is not responsible for assessment deviations caused by inaccurate responses. Even with honest answers, statistical models still have a range of prediction error (false positives and false negatives). ${enMedicalDisclaimer}</p>
+          <h3>Model and response information</h3>
+          <p>Please answer according to your actual situation. Incomplete or inaccurate self-reported information may affect the personalized summary.</p>
+          <p>This service uses models at an internal proof-of-concept stage. Results may be affected by research data and methodological limitations and require continued validation. The report provides health risk factor organization and health education information, not a diagnosis or screening result.</p>
+          <button class="text-link inline-info-link" type="button" data-open-service-info>View full service information and limitations</button>
         </div>
         <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">${i18n.en.ui.consentUnlock}</button>
       </section>
@@ -588,8 +600,8 @@ function renderConsentNotice() {
         <h3 id="consentNoticeTitle">個人資料保護告知事項</h3>
         <dl>
           <div><dt>收集機構</dt><dd>愛立基生醫股份有限公司（EG BioMed Co. Ltd.）</dd></div>
-          <div><dt>收集目的</dt><dd>AI 癌症風險評估研究、個人化風險報告產製及模型訓練驗證</dd></div>
-          <div><dt>個資類別</dt><dd>基本資料（年齡、性別、身高體重）、健康資訊（病史、家族史、生活習慣、臨床症狀）、Email</dd></div>
+          <div><dt>收集目的</dt><dd>癌症相關健康風險因子研究、個人化健康資訊摘要產製及模型訓練驗證</dd></div>
+          <div><dt>個資類別</dt><dd>基本資料（年齡、性別、身高體重）、健康資訊（病史、家族史、生活習慣）、Email</dd></div>
           <div><dt>儲存位置</dt><dd>Microsoft 雲端伺服器（美國），符合 GDPR 及 SOC 2 Type II 安全標準</dd></div>
           <div><dt>保存期限</dt><dd>自填寫日起 5 年，期滿後銷毀或去識別化處理</dd></div>
           <div><dt>利用對象</dt><dd>本公司研究團隊，不對外販售或提供予第三方商業用途</dd></div>
@@ -598,9 +610,10 @@ function renderConsentNotice() {
         </dl>
       </div>
       <div class="consent-notice__section consent-notice__section--warning">
-        <h3>準確度說明與誠實填答要求</h3>
-        <p>本平台 AI 模型效能（訓練驗證集）：整體癌症風險辨識 AUC = 0.966、敏感度 98.1% - 各癌種個別模型 AUC 介於 0.876 至 1.000</p>
-        <p><strong>重要：</strong>本評估結果的準確度高度依賴您的誠實填答。若您填寫不實、隨意作答、故意省略或誇大任何症狀及病史，AI 模型將因輸入資料失真而無法產生有效的風險評估。本公司對因不實填答所導致之評估結果偏差，不負任何責任。即便誠實填答，統計模型仍存在一定範圍之預測誤差（假陽性與假陰性）。${zhMedicalDisclaimer}</p>
+        <h3>模型與填答說明</h3>
+        <p>請依照實際狀況填答。自行填寫的資料若不完整或不正確，可能影響個人化整理結果。</p>
+        <p>本服務使用內部概念驗證階段的模型，結果會受研究資料與方法限制影響，並仍需持續驗證。報告提供健康風險因子整理與健康教育資訊，不是診斷或篩檢結果。</p>
+        <button class="text-link inline-info-link" type="button" data-open-service-info>查看完整服務說明與限制</button>
       </div>
       <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">我已閱讀上述告知事項</button>
     </section>
@@ -678,7 +691,7 @@ function setupConsentGate(question) {
       button.classList.toggle("is-disabled", !consentNoticeRead);
     });
     const saveButton = document.querySelector("#saveMultiBtn");
-    if (saveButton) saveButton.disabled = !consentNoticeRead;
+    if (saveButton) saveButton.disabled = !consentNoticeRead || multiSelection.size < 3;
     if (optionHint) {
       optionHint.textContent = consentNoticeRead
         ? (currentLang === "en" ? i18n.en.ui.consentOptionsReady : "現在請勾選下方三個確認項目。三項都勾選後，再按「三項都已勾選，繼續填寫」。")
@@ -853,6 +866,10 @@ function renderQuickInput(question) {
         }
         button.classList.toggle("is-selected", multiSelection.has(value));
         button.setAttribute("aria-pressed", String(multiSelection.has(value)));
+        if (isConsentQuestion) {
+          const saveButton = document.querySelector("#saveMultiBtn");
+          if (saveButton) saveButton.disabled = !consentNoticeRead || multiSelection.size < (question.minSelected || 1);
+        }
       });
     });
 
@@ -923,6 +940,12 @@ function renderConfirmation() {
       <div class="confirm-submit-notice" role="status">
         <strong>${currentLang === "en" ? i18n.en.ui.confirmPendingTitle : "目前尚未送出"}</strong>
         <p>${currentLang === "en" ? i18n.en.ui.confirmPendingBody : "請先逐項確認本頁所有答案。確認內容正確後，請按最下方「我已確認所有答案，送出資料」按鈕，系統才會正式送出您的資料。"}</p>
+      </div>
+      <div class="analysis-use-note">
+        <strong>${currentLang === "en" ? "How your information will be used" : "送出後如何整理資料"}</strong>
+        <p>${currentLang === "en"
+          ? "After submission, the information listed on this page will be converted into structured health risk factors and used to create a personalized summary with the ten-cancer models. The service does not use this information to determine whether you have cancer."
+          : "送出後，系統會將本頁資料轉換為結構化健康風險因子，並使用十大癌症模型產生個人化摘要。本服務不會依據這些資料判斷您是否罹患癌症。"}</p>
       </div>
       <div class="answer-review-list">
         ${Object.values(answers).map((entry) => `
@@ -1296,7 +1319,7 @@ async function renderResult() {
       <h2 class="question-title">${currentLang === "en" ? i18n.en.ui.completedTitle : "感謝您的填答"}</h2>
       <p class="question-note">${currentLang === "en" ? `${i18n.en.ui.completedNote} ${submission.email}.` : `本次健康探索已完成，您的結果已寄送至 ${submission.email}。`}</p>
       <p class="question-note">${currentLang === "en" ? i18n.en.ui.completedInbox : "請留意信箱收件匣與垃圾郵件匣。"}</p>
-      <p class="disclaimer question-note">${currentLang === "en" ? i18n.en.ui.disclaimer : zhMedicalDisclaimer}</p>
+      <button class="text-link result-info-link" type="button" data-open-service-info>${currentLang === "en" ? i18n.en.ui.completedServiceInfo : "了解報告內容與服務限制"}</button>
       <script type="application/json" id="submissionRowsJson">${safeJsonForHtml(submission.rows)}</script>
       <script type="application/json" id="structuredFeaturesJson">${safeJsonForHtml({
         schema_version: "10Cancer_AI_structure_data_v1_compatible",
@@ -1398,6 +1421,13 @@ languageButtons.forEach((button) => {
     applyStaticText();
     renderQuestion();
   });
+});
+
+document.addEventListener("click", (event) => {
+  const trigger = event.target.closest("[data-open-service-info]");
+  if (!trigger || !serviceDetails) return;
+  serviceDetails.open = true;
+  serviceDetails.scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 applyStaticText();

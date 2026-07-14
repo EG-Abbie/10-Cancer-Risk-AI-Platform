@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AI十大癌症健康風險因子評估</title>
-    <link rel="stylesheet" href="styles.css?v=20260708-mobile" />
+    <link rel="stylesheet" href="styles.css?v=20260714-progressive-disclosure-v2" />
   </head>
   <body>
     <main class="app-shell">
@@ -27,16 +27,17 @@
             透過 5-8 分鐘的互動問答，了解與你相關的癌症風險因子組合。
           </p>
           <div class="trust-strip" aria-label="評估說明">
-            <span>非醫療診斷</span>
+            <span>個人化因子整理</span>
             <span>資料確認後才送出</span>
-            <span>完成後取得個人化摘要</span>
+            <span>中英文 Email 報告</span>
           </div>
           <button class="primary-action" id="startBtn" type="button">
             開始互動評估
           </button>
           <p class="disclaimer">
-            本服務依據使用者自行填寫的年齡、生活型態、家族史、既往病史及其他健康資訊，運用統計與人工智慧方法，提供癌症相關風險因子的個人化整理與健康教育資訊。本結果不代表罹患癌症的機率，不用於癌症診斷、篩檢、早期偵測、疾病預測或治療決策，亦不能取代醫師評估或任何標準醫療檢查。
+            將您的生活習慣、病史與家族史整理成個人化癌症相關健康風險因子摘要。本服務不作為疾病診斷或篩檢。
           </p>
+          <button class="hero-info-link text-link" id="heroServiceInfoBtn" type="button" data-open-service-info>查看完整服務說明</button>
         </div>
       </section>
 
@@ -103,8 +104,37 @@
           </footer>
         </section>
       </section>
+
+      <footer class="site-footer" id="service-information">
+        <div class="site-footer__inner">
+          <div>
+            <p class="site-footer__brand">EG BioMed 愛立基生醫</p>
+            <p class="site-footer__summary" id="footerSummary">個人化癌症相關健康風險因子整理與健康教育資訊。</p>
+          </div>
+          <details class="service-details" id="serviceDetails">
+            <summary id="serviceDetailsSummary">服務說明與使用限制</summary>
+            <div class="service-details__content service-copy" data-service-copy="zh">
+              <h2>關於本服務</h2>
+              <p>本服務依據使用者自行填寫的年齡、生活型態、家族史、既往病史及其他健康資訊，運用統計與人工智慧方法，提供癌症相關風險因子的個人化整理與健康教育資訊。</p>
+              <p>本結果不代表罹患癌症的機率，不用於癌症診斷、篩檢、早期偵測、疾病預測或治療決策，亦不能取代醫師評估或任何標準醫療檢查。</p>
+              <h2>模型現況與限制</h2>
+              <p>本服務使用內部概念驗證階段的統計與人工智慧模型。結果會受自行填寫資料的完整性、正確性、研究資料與模型方法限制影響，且仍需持續驗證與優化。</p>
+              <p>如有持續或明顯身體不適，請尋求合格醫療人員評估。</p>
+            </div>
+            <div class="service-details__content service-copy" data-service-copy="en" hidden>
+              <h2>About this service</h2>
+              <p>This service uses statistical and artificial intelligence methods based on age, lifestyle, family history, past medical history, and other health information self-reported by the user to provide personalized organization of cancer-related risk factors and health education information.</p>
+              <p>The result does not represent the probability of developing cancer and is not intended for cancer diagnosis, screening, early detection, disease prediction, or treatment decision-making. It also cannot replace a physician's evaluation or any standard medical examination.</p>
+              <h2>Current model status and limitations</h2>
+              <p>This service uses statistical and artificial intelligence models at an internal proof-of-concept stage. Results may be affected by the completeness and accuracy of self-reported information, the research data, and methodological limitations. The models require continued validation and improvement.</p>
+              <p>If you have persistent or significant physical discomfort, please seek an evaluation from a qualified healthcare professional.</p>
+            </div>
+          </details>
+          <p class="site-footer__contact">service@eg-bio.com</p>
+        </div>
+      </footer>
     </main>
 
-    <script src="app.js?v=20260714-title-disclaimer"></script>
+    <script src="app.js?v=20260714-progressive-disclosure-v2"></script>
   </body>
 </html>
