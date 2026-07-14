@@ -92,6 +92,18 @@ const i18n = {
       start: "Start Assessment",
       disclaimer: enShortServiceNote,
       serviceInfo: "View full service information",
+      validationBadge: "Internal research validation",
+      validationTitle: "How was the model evaluated?",
+      validationIntro: "In the current research data, the overall model demonstrated the ability to rank and distinguish different risk factor profiles.",
+      metricAucNote: "Risk ranking and discrimination ability",
+      metricSensitivity: "Sensitivity",
+      metricSensitivityNote: "Ability to reduce missed cases under the selected setting",
+      metricSpecificity: "Specificity",
+      metricSpecificityNote: "Ability to identify non-cancer cases in the research data",
+      assessmentItemLabel: "Assessment items",
+      modelFeatureLabel: "Model features",
+      validationNote: "These are model results from internal PoC research data under a defined decision setting. They are not an individual's probability of developing cancer or the accuracy of each personal report.",
+      validationInfo: "Learn about model validation",
       currentSection: "Current Section",
       quick: "Quick Options",
       text: "Text Answer",
@@ -375,6 +387,18 @@ function applyStaticText() {
   startBtn.textContent = currentLang === "en" ? i18n.en.ui.start : "開始互動評估";
   document.querySelector(".disclaimer").textContent = currentLang === "en" ? i18n.en.ui.disclaimer : zhShortServiceNote;
   document.querySelector("#heroServiceInfoBtn").textContent = currentLang === "en" ? i18n.en.ui.serviceInfo : "查看完整服務說明";
+  document.querySelector("#validationBadge").textContent = currentLang === "en" ? i18n.en.ui.validationBadge : "內部研究驗證";
+  document.querySelector("#validationTitle").textContent = currentLang === "en" ? i18n.en.ui.validationTitle : "模型如何被評估？";
+  document.querySelector("#validationIntro").textContent = currentLang === "en" ? i18n.en.ui.validationIntro : "整體模型在目前研究資料中，展現對不同風險因子組合的排序與區分能力。";
+  document.querySelector("#metricAucNote").textContent = currentLang === "en" ? i18n.en.ui.metricAucNote : "風險排序與區分能力";
+  document.querySelector("#metricSensitivity").textContent = currentLang === "en" ? i18n.en.ui.metricSensitivity : "敏感度";
+  document.querySelector("#metricSensitivityNote").textContent = currentLang === "en" ? i18n.en.ui.metricSensitivityNote : "在既定設定下降低遺漏個案的能力";
+  document.querySelector("#metricSpecificity").textContent = currentLang === "en" ? i18n.en.ui.metricSpecificity : "特異性";
+  document.querySelector("#metricSpecificityNote").textContent = currentLang === "en" ? i18n.en.ui.metricSpecificityNote : "在研究資料中辨識非癌症個案的能力";
+  document.querySelector("#assessmentItemLabel").textContent = currentLang === "en" ? i18n.en.ui.assessmentItemLabel : "評估項目";
+  document.querySelector("#modelFeatureLabel").textContent = currentLang === "en" ? i18n.en.ui.modelFeatureLabel : "模型特徵";
+  document.querySelector("#validationNote").textContent = currentLang === "en" ? i18n.en.ui.validationNote : "以上為內部 PoC 研究資料與既定判定設定下的模型表現，不是個人罹癌機率，也不代表每份個人報告的準確率。";
+  document.querySelector("#validationInfoBtn").textContent = currentLang === "en" ? i18n.en.ui.validationInfo : "了解模型驗證方式";
   document.querySelector("#footerSummary").textContent = currentLang === "en"
     ? "Personalized organization of cancer-related health risk factors and health education information."
     : "個人化癌症相關健康風險因子整理與健康教育資訊。";
