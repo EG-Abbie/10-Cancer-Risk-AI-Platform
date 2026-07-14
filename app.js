@@ -363,8 +363,8 @@ function getEntryDisplayLabel(entry) {
 
 function applyStaticText() {
   document.documentElement.lang = currentLang === "en" ? "en" : "zh-Hant";
-  document.title = currentLang === "en" ? i18n.en.ui.appTitle : "AI 癌症風險互動評估";
-  document.querySelector("#hero-title").textContent = currentLang === "en" ? i18n.en.ui.heroTitle : "AI 癌症風險互動評估";
+  document.title = currentLang === "en" ? i18n.en.ui.appTitle : "AI十大癌症健康風險因子評估";
+  document.querySelector("#hero-title").textContent = currentLang === "en" ? i18n.en.ui.heroTitle : "AI十大癌症健康風險因子評估";
   document.querySelector(".hero__subtitle").textContent = currentLang === "en" ? i18n.en.ui.heroSubtitle : "透過 5-8 分鐘的互動問答，了解與你相關的癌症風險因子組合。";
   const trustItems = document.querySelectorAll(".trust-strip span");
   const trustCopy = currentLang === "en" ? [i18n.en.ui.trust1, i18n.en.ui.trust2, i18n.en.ui.trust3] : ["非醫療診斷", "資料確認後才送出", "完成後取得個人化摘要"];
