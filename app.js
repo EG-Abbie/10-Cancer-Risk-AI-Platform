@@ -105,6 +105,8 @@ const i18n = {
       trainingDatasetNote: "Covering 10 cancer types and healthy controls",
       modelTrainingLabel: "model training runs",
       modelTrainingNote: "Used for model comparison and optimization",
+      modelValidationLabel: "model validation runs",
+      modelValidationNote: "Used to evaluate model performance and consistency",
       assessmentItemLabel: "Assessment items",
       modelFeatureLabel: "Model features",
       validationNote: "These are model results from internal PoC research data under a defined decision setting. They are not an individual's probability of developing cancer or the accuracy of each personal report.",
@@ -405,6 +407,8 @@ function applyStaticText() {
   document.querySelector("#trainingDatasetNote").textContent = currentLang === "en" ? i18n.en.ui.trainingDatasetNote : "涵蓋 10 種癌症與健康對照";
   document.querySelector("#modelTrainingLabel").textContent = currentLang === "en" ? i18n.en.ui.modelTrainingLabel : "次模型訓練";
   document.querySelector("#modelTrainingNote").textContent = currentLang === "en" ? i18n.en.ui.modelTrainingNote : "用於模型比較與最佳化";
+  document.querySelector("#modelValidationLabel").textContent = currentLang === "en" ? i18n.en.ui.modelValidationLabel : "次模型驗證";
+  document.querySelector("#modelValidationNote").textContent = currentLang === "en" ? i18n.en.ui.modelValidationNote : "用於評估模型表現與穩定性";
   document.querySelector("#assessmentItemLabel").textContent = currentLang === "en" ? i18n.en.ui.assessmentItemLabel : "評估項目";
   document.querySelector("#modelFeatureLabel").textContent = currentLang === "en" ? i18n.en.ui.modelFeatureLabel : "模型特徵";
   document.querySelector("#validationNote").textContent = currentLang === "en" ? i18n.en.ui.validationNote : "以上為內部 PoC 研究資料與既定判定設定下的模型表現，不是個人罹癌機率，也不代表每份個人報告的準確率。";

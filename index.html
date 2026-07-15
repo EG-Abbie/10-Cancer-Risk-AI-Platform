@@ -44,12 +44,12 @@
                 <p class="validation-group__label" id="validationPerformanceLabel">研究表現</p>
                 <div class="validation-metrics">
                   <div class="validation-metric">
-                    <strong>0.966</strong>
+                    <strong>0.96 ± 0.013</strong>
                     <span id="metricAuc">ROC-AUC</span>
                     <small id="metricAucNote">風險排序與區分能力</small>
                   </div>
                   <div class="validation-metric">
-                    <strong>98.1%</strong>
+                    <strong>96.5%</strong>
                     <span id="metricSensitivity">敏感度</span>
                     <small id="metricSensitivityNote">在既定設定下降低遺漏個案的能力</small>
                   </div>
@@ -66,10 +66,17 @@
                     </div>
                   </div>
                   <div class="validation-evidence__item">
-                    <strong>1,440</strong>
+                    <strong>1,100</strong>
                     <div>
                       <span id="modelTrainingLabel">次模型訓練</span>
                       <small id="modelTrainingNote">用於模型比較與最佳化</small>
+                    </div>
+                  </div>
+                  <div class="validation-evidence__item">
+                    <strong>1,100</strong>
+                    <div>
+                      <span id="modelValidationLabel">次模型驗證</span>
+                      <small id="modelValidationNote">用於評估模型表現與穩定性</small>
                     </div>
                   </div>
                 </div>
@@ -195,6 +202,6 @@
       </footer>
     </main>
 
-    <script src="app.js?v=20260714-validation-card-v3"></script>
+    <script src="app.js?v=20260715-validation-card-v4"></script>
   </body>
 </html>
