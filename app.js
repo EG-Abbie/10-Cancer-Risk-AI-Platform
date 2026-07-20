@@ -691,8 +691,9 @@ function renderQuestion() {
   inputZone.hidden = false;
   inputZone.classList.toggle("input-zone--consent", question.id === "consent_acknowledgement");
   panelFooter.hidden = false;
-  skipBtn.hidden = !question.required || question.id === "consent_acknowledgement";
-  skipBtn.disabled = question.id === "consent_acknowledgement";
+  const cannotSkip = question.id === "consent_acknowledgement" || question.type === "email";
+  skipBtn.hidden = !question.required || cannotSkip;
+  skipBtn.disabled = cannotSkip;
   guideMessage.textContent = currentIndex === 0 ? ui("guideIntro") : ui("guideDefault");
 
   const activeQuestions = getActiveQuestions();
@@ -1078,6 +1079,16 @@ function calculateAge() {
   return Number.isInteger(birthYear) && age >= 0 && age <= 120 ? age : "";
 }
 
+function validateContactEmail() {
+  const email = String(getAnswerValue(answers, "contact.email") || "").trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return currentLang === "en"
+      ? "Please go back and enter a valid email address. The report cannot be sent without one."
+      : "請返回修改 Email 並輸入有效的電子郵件地址，否則系統無法寄送報告。";
+  }
+  return "";
+}
+
 function validateCoreMeasurements() {
   const currentYear = new Date().getFullYear();
   const birthYear = normalizeNumber(getAnswerValue(answers, "demographics.birth_year"));
@@ -1403,6 +1414,11 @@ function showSubmitError(message) {
 }
 
 async function renderResult() {
+  const emailError = validateContactEmail();
+  if (emailError) {
+    showSubmitError(emailError);
+    return;
+  }
   const measurementError = validateCoreMeasurements();
   if (measurementError) {
     showSubmitError(measurementError);
@@ -1536,7 +1552,8 @@ backBtn.addEventListener("click", () => {
 });
 
 skipBtn.addEventListener("click", () => {
-  if (getCurrentQuestion()?.id === "consent_acknowledgement") return;
+  const question = getCurrentQuestion();
+  if (question?.id === "consent_acknowledgement" || question?.type === "email") return;
   saveAnswer("不確定", "uncertain");
 });
 

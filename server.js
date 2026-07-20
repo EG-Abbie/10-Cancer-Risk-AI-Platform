@@ -129,6 +129,11 @@ function validateAiApiFeatureRow(row) {
   return null;
 }
 
+function getValidSubmissionEmail(submission) {
+  const email = String(submission.email || findAnswer(submission.rows, "email") || "").trim();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : "";
+}
+
 async function forwardSubmission(req, res) {
   if (!POWER_AUTOMATE_WEBHOOK_URL) {
     sendJson(res, 503, {
@@ -152,6 +157,18 @@ async function forwardSubmission(req, res) {
     return;
   }
   submission = normalizeSubmission(submission);
+  const validEmail = getValidSubmissionEmail(submission);
+  if (!validEmail) {
+    sendJson(res, 422, {
+      ok: false,
+      error: "A valid email address is required."
+    });
+    return;
+  }
+  submission.email = validEmail;
+  if (submission.excel_row && typeof submission.excel_row === "object") {
+    submission.excel_row.email = validEmail;
+  }
   const featureValidationError = validateAiApiFeatureRow(submission.ai_api_feature_row);
   if (featureValidationError) {
     sendJson(res, 422, {
