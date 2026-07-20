@@ -865,9 +865,10 @@ function renderQuickInput(question) {
   }
 
   if (question.type === "number") {
+    const bounds = getNumberBounds(question);
     quickOptions.innerHTML = `
       <div class="number-entry">
-        <input id="numberInput" type="number" inputmode="numeric" placeholder="${questionCopy.placeholder || (currentLang === "en" ? "Enter a number" : "輸入數字")}" />
+        <input id="numberInput" type="number" inputmode="numeric"${bounds ? ` min="${bounds.min}" max="${bounds.max}" step="${bounds.step}"` : ""} placeholder="${questionCopy.placeholder || (currentLang === "en" ? "Enter a number" : "輸入數字")}" />
         <button class="secondary-action" id="saveNumberBtn" type="button">${ui("saveContinue")}</button>
       </div>
     `;
@@ -875,6 +876,11 @@ function renderQuickInput(question) {
       const value = document.querySelector("#numberInput").value.trim();
       if (!value) {
         showInlineNotice(currentLang === "en" ? i18n.en.ui.numberRequired : "請先輸入數字，或使用「不確定怎麼回答」。");
+        return;
+      }
+      const validationMessage = getNumberValidationMessage(question, value);
+      if (validationMessage) {
+        showInlineNotice(validationMessage);
         return;
       }
       saveAnswer(value, "number_input");
@@ -937,6 +943,55 @@ function renderQuickInput(question) {
 function showInlineNotice(message) {
   parseCard.innerHTML = `<p class="helper-text">${message}</p>`;
   parseCard.hidden = false;
+}
+
+function getNumberBounds(question) {
+  const currentYear = new Date().getFullYear();
+  const bounds = {
+    birth_year: { min: currentYear - 120, max: currentYear, step: 1 },
+    height_cm: { min: 100, max: 250, step: 0.1 },
+    weight_kg: { min: 20, max: 300, step: 0.1 },
+    pregnancy_count: { min: 0, max: 30, step: 1 },
+    live_birth_count: { min: 0, max: 30, step: 1 }
+  };
+  return bounds[question.id] || null;
+}
+
+function getNumberValidationMessage(question, rawValue) {
+  const value = Number(rawValue);
+  if (!Number.isFinite(value)) {
+    return currentLang === "en" ? "Please enter a valid number." : "請輸入有效的數字。";
+  }
+
+  const bounds = getNumberBounds(question);
+  if (!bounds) return "";
+
+  if (bounds.step === 1 && !Number.isInteger(value)) {
+    return currentLang === "en" ? "Please enter a whole number." : "請輸入整數。";
+  }
+
+  if (value < bounds.min || value > bounds.max) {
+    if (question.id === "birth_year") {
+      return currentLang === "en"
+        ? `Please enter a four-digit year between ${bounds.min} and ${bounds.max}.`
+        : `請輸入 ${bounds.min} 至 ${bounds.max} 之間的四位數西元出生年。`;
+    }
+    if (question.id === "height_cm") {
+      return currentLang === "en"
+        ? "Please enter a height between 100 and 250 cm."
+        : "請確認身高，應輸入 100 至 250 公分之間的數值。";
+    }
+    if (question.id === "weight_kg") {
+      return currentLang === "en"
+        ? "Please enter a weight between 20 and 300 kg."
+        : "請確認體重，應輸入 20 至 300 公斤之間的數值。";
+    }
+    return currentLang === "en"
+      ? `Please enter a value between ${bounds.min} and ${bounds.max}.`
+      : `請輸入 ${bounds.min} 至 ${bounds.max} 之間的數值。`;
+  }
+
+  return "";
 }
 
 function saveAnswer(value, source, structured = null) {
@@ -1009,7 +1064,7 @@ function renderConfirmation() {
 function calculateBmi() {
   const height = Number(getAnswerValue(answers, "demographics.height_cm"));
   const weight = Number(getAnswerValue(answers, "demographics.weight_kg"));
-  if (height > 0 && weight > 0) {
+  if (height >= 100 && height <= 250 && weight >= 20 && weight <= 300) {
     return Number((weight / ((height / 100) ** 2)).toFixed(1));
   }
   return "";
@@ -1018,7 +1073,39 @@ function calculateBmi() {
 function calculateAge() {
   const birthYear = normalizeNumber(getAnswerValue(answers, "demographics.birth_year"));
   if (!birthYear) return "";
-  return new Date().getFullYear() - birthYear;
+  const currentYear = new Date().getFullYear();
+  const age = currentYear - birthYear;
+  return Number.isInteger(birthYear) && age >= 0 && age <= 120 ? age : "";
+}
+
+function validateCoreMeasurements() {
+  const currentYear = new Date().getFullYear();
+  const birthYear = normalizeNumber(getAnswerValue(answers, "demographics.birth_year"));
+  const height = normalizeNumber(getAnswerValue(answers, "demographics.height_cm"));
+  const weight = normalizeNumber(getAnswerValue(answers, "demographics.weight_kg"));
+  const bmi = calculateBmi();
+
+  if (!Number.isInteger(birthYear) || birthYear < currentYear - 120 || birthYear > currentYear) {
+    return currentLang === "en"
+      ? `Please go back and enter a valid four-digit birth year between ${currentYear - 120} and ${currentYear}.`
+      : `請返回修改出生年，並輸入 ${currentYear - 120} 至 ${currentYear} 之間的四位數西元年份。`;
+  }
+  if (height == null || height < 100 || height > 250) {
+    return currentLang === "en"
+      ? "Please go back and enter a height between 100 and 250 cm."
+      : "請返回修改身高，並輸入 100 至 250 公分之間的數值。";
+  }
+  if (weight == null || weight < 20 || weight > 300) {
+    return currentLang === "en"
+      ? "Please go back and enter a weight between 20 and 300 kg."
+      : "請返回修改體重，並輸入 20 至 300 公斤之間的數值。";
+  }
+  if (bmi === "" || bmi < 10 || bmi > 100) {
+    return currentLang === "en"
+      ? "The calculated BMI is outside the supported range. Please go back and verify your height and weight."
+      : "依身高與體重計算的 BMI 超出可接受範圍，請返回確認身高與體重是否正確。";
+  }
+  return "";
 }
 
 function boolFromYesNo(value) {
@@ -1316,6 +1403,11 @@ function showSubmitError(message) {
 }
 
 async function renderResult() {
+  const measurementError = validateCoreMeasurements();
+  if (measurementError) {
+    showSubmitError(measurementError);
+    return;
+  }
   const submission = storeSubmissionForIntegration();
   const runButton = document.querySelector("#runModelBtn");
   if (runButton) {

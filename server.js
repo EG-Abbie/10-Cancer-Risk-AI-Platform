@@ -107,6 +107,28 @@ function normalizeSubmission(submission) {
   return submission;
 }
 
+function validateAiApiFeatureRow(row) {
+  const rules = [
+    { field: "age", min: 0, max: 120 },
+    { field: "height_cm", min: 100, max: 250 },
+    { field: "weight_kg", min: 20, max: 300 },
+    { field: "bmi", min: 10, max: 100 }
+  ];
+
+  for (const rule of rules) {
+    const value = normalizeNumber(row?.[rule.field]);
+    if (value == null || value < rule.min || value > rule.max) {
+      return {
+        field: rule.field,
+        value: row?.[rule.field],
+        min: rule.min,
+        max: rule.max
+      };
+    }
+  }
+  return null;
+}
+
 async function forwardSubmission(req, res) {
   if (!POWER_AUTOMATE_WEBHOOK_URL) {
     sendJson(res, 503, {
@@ -130,6 +152,15 @@ async function forwardSubmission(req, res) {
     return;
   }
   submission = normalizeSubmission(submission);
+  const featureValidationError = validateAiApiFeatureRow(submission.ai_api_feature_row);
+  if (featureValidationError) {
+    sendJson(res, 422, {
+      ok: false,
+      error: "Invalid core measurement.",
+      detail: featureValidationError
+    });
+    return;
+  }
 
   try {
     const response = await fetch(POWER_AUTOMATE_WEBHOOK_URL, {
