@@ -6,6 +6,7 @@ const enShortServiceNote = "Receive a personalized summary of cancer-related hea
 const modules = [
   { id: "consent", title: "知情同意", summary: "先確認個資告知與非診斷性質。" },
   { id: "basic", title: "基本資料", summary: "收集年齡、身高體重、運動與性別等基本資訊。" },
+  { id: "symptoms", title: "近期症狀", summary: "依身體系統整理最近三個月內持續、反覆或原因不明的症狀。" },
   { id: "female", title: "女性相關資訊", summary: "依性別條件詢問月經、生育、哺乳、子宮頸抹片與荷爾蒙用藥。" },
   { id: "exposure", title: "菸草與環境暴露", summary: "整理抽菸、二手菸、油煙、空污與輻射等暴露因子。" },
   { id: "mental", title: "心理健康", summary: "記錄近期壓力、睡眠與情緒困擾頻率。" },
@@ -23,6 +24,168 @@ const consentOptions = [
 ];
 
 const cancerOptions = ["乳癌", "攝護腺癌", "肺癌", "頭頸癌", "胰臟癌", "肝癌", "大腸直腸癌", "胃癌", "子宮內膜癌", "膀胱癌", "腎癌", "其他癌種"];
+
+const symptomNoneOption = "以上皆無";
+const symptomReminderZh = "以下問題旨在了解您近期的身體狀況。請回想最近 3 個月內是否曾出現相關症狀；若症狀持續超過 2 週以上、反覆發生或原因不明，請選擇「是」。";
+const symptomReminderEn = "The following questions are intended to understand your recent physical condition. Please recall whether you experienced any of these symptoms during the past 3 months. Select “Yes” when a symptom lasted for more than 2 weeks, occurred repeatedly, or had no clear cause.";
+
+const symptomGroups = [
+  {
+    id: "symptoms_general",
+    title: "全身性症狀",
+    titleEn: "General Symptoms",
+    field: "symptoms.general",
+    options: [
+      ["不明原因體重下降（過去 6 個月超過體重 5%）", "Unexplained weight loss of more than 5% in the past 6 months", "symptom_unexplained_weight_loss_6m"],
+      ["經常疲倦或體力明顯下降（非因工作或睡眠不足）", "Frequent fatigue or a marked decline in energy not explained by work or lack of sleep", "symptom_fatigue"],
+      ["食慾降低或食量明顯減少", "Reduced appetite or a noticeable decrease in food intake", "symptom_appetite_loss"],
+      ["曾被診斷貧血，或近期抽血發現血色素偏低", "Diagnosed anemia or a recent blood test showing low hemoglobin", "symptom_anemia"],
+      ["夜間盜汗（非因環境過熱或更年期）", "Night sweats not explained by a hot environment or menopause", "symptom_night_sweats"],
+      ["不明原因發燒（體溫超過 38°C，持續超過 1 週）", "Unexplained fever above 38°C lasting more than 1 week", "symptom_unexplained_fever"]
+    ]
+  },
+  {
+    id: "symptoms_gastrointestinal",
+    title: "消化道症狀",
+    titleEn: "Gastrointestinal Symptoms",
+    field: "symptoms.gastrointestinal",
+    options: [
+      ["經常腹脹", "Frequent abdominal bloating", "symptom_bloating"],
+      ["容易過早飽足（吃少量就飽）", "Early satiety after eating only a small amount", "symptom_early_satiety"],
+      ["上腹悶痛或消化不良", "Upper abdominal discomfort or indigestion", "symptom_upper_abdominal_discomfort"],
+      ["噁心感（非懷孕或暈車引起）", "Nausea not caused by pregnancy or motion sickness", "symptom_nausea"],
+      ["持續腹痛", "Persistent abdominal pain", "symptom_persistent_abdominal_pain"],
+      ["持續背痛（非外傷或肌肉引起）", "Persistent back pain not explained by injury or muscle strain", "symptom_persistent_back_pain"],
+      ["吞嚥困難、吞嚥疼痛或食物卡住感", "Difficulty or pain when swallowing, or a feeling that food is stuck", "symptom_dysphagia"],
+      ["排便習慣改變（腹瀉與便秘交替，或糞便持續變細）", "Change in bowel habits, alternating diarrhea and constipation, or persistently narrow stools", "symptom_bowel_habit_change"],
+      ["血便（鮮紅色血液）", "Bright red blood in the stool", "symptom_hematochezia"],
+      ["黑便（柏油狀、黑色糞便）", "Black, tarry stools", "symptom_melena"],
+      ["頻繁想排便但感覺排不乾淨（裡急後重）", "Frequent urge to have a bowel movement with incomplete emptying", "symptom_tenesmus"],
+      ["糞便潛血檢查曾發現異常", "Previous abnormal fecal occult blood test", "symptom_abnormal_fobt"]
+    ]
+  },
+  {
+    id: "symptoms_hepatobiliary",
+    title: "肝膽胰症狀",
+    titleEn: "Liver, Biliary, and Pancreatic Symptoms",
+    field: "symptoms.hepatobiliary",
+    options: [
+      ["黃疸（皮膚或眼白變黃）", "Jaundice, with yellowing of the skin or whites of the eyes", "symptom_jaundice"],
+      ["皮膚搔癢（非皮膚疾病引起）", "Itchy skin not explained by a skin condition", "symptom_pruritus"],
+      ["尿液顏色明顯變深（如濃茶色）", "Noticeably dark urine, such as tea-colored urine", "symptom_dark_urine"],
+      ["糞便顏色變淺或呈灰白色", "Pale or grayish stools", "symptom_pale_stool"],
+      ["右上腹不適或悶痛", "Discomfort or dull pain in the right upper abdomen", "symptom_right_upper_abdominal_discomfort"],
+      ["過去 2 年內才被診斷糖尿病", "Diabetes newly diagnosed within the past 2 years", "symptom_recent_diabetes_diagnosis"],
+      ["已有糖尿病，但血糖控制突然變差", "Sudden worsening of blood glucose control in existing diabetes", "symptom_worsening_diabetes_control"]
+    ]
+  },
+  {
+    id: "symptoms_respiratory",
+    title: "呼吸系統症狀",
+    titleEn: "Respiratory Symptoms",
+    field: "symptoms.respiratory",
+    options: [
+      ["持續咳嗽超過 3 週（非感冒引起）", "Cough lasting more than 3 weeks and not caused by a cold", "symptom_persistent_cough"],
+      ["咳血或痰中帶血", "Coughing up blood or blood-streaked sputum", "symptom_hemoptysis"],
+      ["一年內反覆發生肺炎 2 次以上", "Pneumonia occurring 2 or more times within 1 year", "symptom_recurrent_pneumonia"],
+      ["持續胸痛或胸悶", "Persistent chest pain or tightness", "symptom_chest_pain"]
+    ]
+  },
+  {
+    id: "symptoms_breast",
+    title: "乳房症狀",
+    titleEn: "Breast Symptoms",
+    field: "symptoms.breast",
+    femaleOnly: true,
+    options: [
+      ["乳房腫塊或局部硬塊", "A breast lump or localized hard area", "symptom_breast_lump"],
+      ["新發生的乳頭凹陷（非天生）", "New nipple retraction that was not present from birth", "symptom_nipple_retraction"],
+      ["乳頭異常分泌物（尤其是血性分泌物）", "Abnormal nipple discharge, especially bloody discharge", "symptom_nipple_discharge"],
+      ["乳房皮膚橘皮樣變化或局部凹陷", "Orange-peel-like breast skin changes or localized dimpling", "symptom_breast_skin_change"]
+    ]
+  },
+  {
+    id: "symptoms_urogynecological",
+    title: "泌尿及生殖系統症狀",
+    titleEn: "Urinary and Reproductive Symptoms",
+    field: "symptoms.urogynecological",
+    options: [
+      ["頻尿（白天排尿超過 8 次）", "Frequent urination, more than 8 times during the day", "symptom_urinary_frequency"],
+      ["夜尿增加（晚上起床排尿超過 2 次）", "Increased nighttime urination, more than 2 times per night", "symptom_nocturia"],
+      ["尿流變細或排尿無力", "Weak or narrowed urine stream", "symptom_weak_urine_stream"],
+      ["排尿困難（需用力才能排出）", "Difficulty urinating or needing to strain", "symptom_urinary_hesitancy"],
+      ["排尿中斷（排尿時尿流突然停止）", "Interrupted urine flow", "symptom_interrupted_urine_flow"],
+      ["尿液中有血", "Blood in the urine", "symptom_hematuria"],
+      ["月經以外的異常陰道出血", "Abnormal vaginal bleeding outside menstruation", "symptom_abnormal_vaginal_bleeding", true],
+      ["停經後陰道出血", "Vaginal bleeding after menopause", "symptom_postmenopausal_bleeding", true],
+      ["月經異常增多或不規則出血", "Unusually heavy menstruation or irregular bleeding", "symptom_heavy_irregular_menstruation", true],
+      ["骨盆腔不適或腹圍增加", "Pelvic discomfort or increased abdominal girth", "symptom_pelvic_discomfort_or_increased_girth"]
+    ]
+  },
+  {
+    id: "symptoms_head_neck",
+    title: "頭頸部症狀",
+    titleEn: "Head and Neck Symptoms",
+    field: "symptoms.head_neck",
+    options: [
+      ["口腔潰瘍超過 2 週未癒合", "An oral ulcer that has not healed after more than 2 weeks", "symptom_oral_ulcer"],
+      ["持續聲音沙啞超過 3 週（非感冒引起）", "Hoarseness lasting more than 3 weeks and not caused by a cold", "symptom_hoarseness"],
+      ["頸部摸得到腫塊或硬塊", "A palpable lump or hard mass in the neck", "symptom_neck_lump"],
+      ["口腔白斑或紅斑", "A white or red patch in the mouth", "symptom_oral_white_red_patch"]
+    ]
+  },
+  {
+    id: "symptoms_neurological",
+    title: "神經系統症狀",
+    titleEn: "Neurological Symptoms",
+    field: "symptoms.neurological",
+    options: [
+      ["新發生的持續頭痛（非過去的偏頭痛模式）", "A new persistent headache that differs from a previous migraine pattern", "symptom_new_headache"],
+      ["新發生的癲癇或抽搐", "A new seizure or convulsion", "symptom_seizure"],
+      ["視力模糊或視野缺損（非近視或老花）", "Blurred vision or visual field loss not explained by myopia or presbyopia", "symptom_visual_change"],
+      ["肢體無力或麻木", "Weakness or numbness in an arm or leg", "symptom_limb_weakness_numbness"],
+      ["人格改變或記憶力明顯衰退", "Personality change or a marked decline in memory", "symptom_personality_memory_change"]
+    ]
+  },
+  {
+    id: "symptoms_hematologic",
+    title: "血液及淋巴系統症狀",
+    titleEn: "Blood and Lymphatic Symptoms",
+    field: "symptoms.hematologic",
+    options: [
+      ["一年內反覆感染 3 次以上，或感染久久不癒", "Repeated infections 3 or more times within 1 year, or an infection that does not resolve", "symptom_recurrent_infection"],
+      ["容易瘀青或異常出血（小傷口出血久不止）", "Easy bruising or unusual bleeding, including prolonged bleeding from a small wound", "symptom_easy_bruising_bleeding"],
+      ["淋巴結腫大（頸部、腋下或鼠蹊部腫塊）", "Enlarged lymph nodes or lumps in the neck, armpit, or groin", "symptom_lymphadenopathy"]
+    ]
+  }
+];
+
+const symptomOptionTranslations = symptomGroups.reduce((translations, group) => {
+  group.options.forEach(([label, english]) => {
+    translations[label] = english;
+  });
+  return translations;
+}, {});
+
+const symptomQuestions = symptomGroups.map((group) => ({
+  id: group.id,
+  module: "symptoms",
+  type: "multi",
+  required: true,
+  title: group.title,
+  titleEn: group.titleEn,
+  note: "請直接勾選曾出現的症狀；若都沒有，請選「以上皆無」。",
+  noteEn: "Select every symptom that applies. If none apply, select “None of the above.”",
+  field: group.field,
+  options: [...group.options.map(([label]) => label), symptomNoneOption],
+  symptomDefinitions: group.options,
+  femaleOnly: group.femaleOnly === true,
+  noneOption: symptomNoneOption,
+  isSymptomGroup: true,
+  appliesIf: group.femaleOnly
+    ? (answers) => getAnswerValue(answers, "demographics.sex") === "女性"
+    : undefined
+}));
 
 const questions = [
   {
@@ -42,6 +205,8 @@ const questions = [
   { id: "weight_change", module: "basic", type: "single", required: true, title: "近半年內，您的體重是否有明顯增加或減少（超過體重 5%）？", note: "若不確定，請選不確定。", field: "demographics.weight_change_over_5_percent", options: ["是", "否", "不確定"] },
   { id: "exercise_time", module: "basic", type: "single", required: true, title: "每週運動時間", note: "請選擇最接近您一般狀況的選項。", field: "lifestyle.weekly_exercise_time", options: ["幾乎不運動", "30-60 分鐘", "1-2 小時", "多於 2 小時"] },
   { id: "sex", module: "basic", type: "single", required: true, title: "您的性別？", note: "系統會依您的選擇顯示適用題目。", field: "demographics.sex", options: ["男性", "女性"] },
+
+  ...symptomQuestions,
 
   { id: "menarche_age", module: "female", type: "single", required: true, title: "初經（第一次月經）來潮年齡", note: "若不確定，可使用下方不確定選項。", field: "female_health.menarche_age", options: ["12 歲以前（含 12 歲）", "13 歲以後（含 13 歲）"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
   { id: "menopause_status", module: "female", type: "single", required: true, title: "目前停經（更年期）狀態", note: "請選擇最接近目前狀況的選項。", field: "female_health.menopause_status", options: ["尚未停經（仍有月經）", "已停經（55 歲或以前停經）", "已停經（55 歲或以後停經）", "已切除子宮或卵巢"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
@@ -85,7 +250,7 @@ const i18n = {
     ui: {
       appTitle: "AI Ten-Cancer Health Risk Factor Assessment",
       heroTitle: "AI Ten-Cancer Health Risk Factor Assessment",
-      heroSubtitle: "Complete a 5-8 minute guided health exploration to understand your cancer-related risk factor profile.",
+      heroSubtitle: "Complete an 8-12 minute guided health exploration to understand your cancer-related risk factor profile.",
       trust1: "Personalized factor summary",
       trust2: "Submit only after review",
       trust3: "Bilingual email report",
@@ -107,7 +272,8 @@ const i18n = {
       modelTrainingNote: "Used for model comparison and optimization",
       modelValidationLabel: "model validation runs",
       modelValidationNote: "Used to evaluate model performance and consistency",
-      assessmentItemLabel: "Assessment items",
+      assessmentItemLabel: "Current model assessment items",
+      symptomItemLabel: "New symptom observations",
       modelFeatureLabel: "Model features",
       validationNote: "These are model results from internal PoC research data under a defined decision setting. They are not an individual's probability of developing cancer or the accuracy of each personal report.",
       validationInfo: "Learn about model validation",
@@ -167,6 +333,7 @@ const i18n = {
     modules: {
       consent: ["Informed Consent", "Review privacy notice and non-diagnostic nature."],
       basic: ["Basic Information", "Collect age, height, weight, exercise, and sex."],
+      symptoms: ["Recent Symptoms", "Review persistent, recurring, or unexplained symptoms during the past 3 months by body system."],
       female: ["Female Health Information", "Questions on menstruation, pregnancy, breastfeeding, Pap smear, and hormone use."],
       exposure: ["Tobacco and Environmental Exposure", "Record smoking, secondhand smoke, cooking fumes, air pollution, and radiation exposure."],
       mental: ["Mental Health", "Record recent stress, sleep, and low mood frequency."],
@@ -178,7 +345,8 @@ const i18n = {
     },
     feedback: {
       consent: "Informed consent completed. Next, we will organize basic information.",
-      basic: "Basic information completed. Next, we will ask about lifestyle and health status.",
+      basic: "Basic information completed. Next, we will review your recent physical symptoms.",
+      symptoms: "Recent symptom review completed. Next, we will continue with other health information.",
       female: "Female health information completed. Next, we will ask about tobacco and environmental exposure.",
       exposure: "Tobacco and environmental exposure completed. Next, we will ask about stress, sleep, and mood.",
       mental: "Mental health completed. Next, we will ask about dietary habits.",
@@ -299,6 +467,8 @@ const optimizedFeatureColumns = [
   "pap_smear_abnormal", "hormone_drug", "score", "data_source"
 ];
 
+const symptomFeatureColumns = symptomGroups.flatMap((group) => group.options.map(([, , column]) => column));
+
 const answers = {};
 let currentIndex = 0;
 let activeMode = "quick";
@@ -351,7 +521,7 @@ function ui(key) {
 
 function tx(value) {
   if (currentLang !== "en") return value;
-  return i18n.en.options[value] || i18n.en.symptom[value] || value;
+  return symptomOptionTranslations[value] || i18n.en.options[value] || i18n.en.symptom[value] || value;
 }
 
 function getModuleCopy(module) {
@@ -367,8 +537,8 @@ function getQuestionCopy(question) {
   };
   const copy = i18n.en.questions[question.id] || [];
   return {
-    title: copy[0] || question.title,
-    note: copy[1] || question.note,
+    title: copy[0] || question.titleEn || question.title,
+    note: copy[1] || question.noteEn || question.note,
     placeholder: copy[2] || question.placeholder
   };
 }
@@ -387,7 +557,7 @@ function applyStaticText() {
   document.documentElement.lang = currentLang === "en" ? "en" : "zh-Hant";
   document.title = currentLang === "en" ? i18n.en.ui.appTitle : "AI十大癌症健康風險因子評估";
   document.querySelector("#hero-title").textContent = currentLang === "en" ? i18n.en.ui.heroTitle : "AI十大癌症健康風險因子評估";
-  document.querySelector(".hero__subtitle").textContent = currentLang === "en" ? i18n.en.ui.heroSubtitle : "透過 5-8 分鐘的互動問答，了解與你相關的癌症風險因子組合。";
+  document.querySelector(".hero__subtitle").textContent = currentLang === "en" ? i18n.en.ui.heroSubtitle : "透過 8-12 分鐘的互動問答，了解與你相關的癌症風險因子組合。";
   const trustItems = document.querySelectorAll(".trust-strip span");
   const trustCopy = currentLang === "en" ? [i18n.en.ui.trust1, i18n.en.ui.trust2, i18n.en.ui.trust3] : ["個人化因子整理", "資料確認後才送出", "中英文 Email 報告"];
   trustItems.forEach((item, index) => { item.textContent = trustCopy[index]; });
@@ -409,7 +579,8 @@ function applyStaticText() {
   document.querySelector("#modelTrainingNote").textContent = currentLang === "en" ? i18n.en.ui.modelTrainingNote : "用於模型比較與最佳化";
   document.querySelector("#modelValidationLabel").textContent = currentLang === "en" ? i18n.en.ui.modelValidationLabel : "次模型驗證";
   document.querySelector("#modelValidationNote").textContent = currentLang === "en" ? i18n.en.ui.modelValidationNote : "用於評估模型表現與穩定性";
-  document.querySelector("#assessmentItemLabel").textContent = currentLang === "en" ? i18n.en.ui.assessmentItemLabel : "評估項目";
+  document.querySelector("#assessmentItemLabel").textContent = currentLang === "en" ? i18n.en.ui.assessmentItemLabel : "現行模型評估項目";
+  document.querySelector("#symptomItemLabel").textContent = currentLang === "en" ? i18n.en.ui.symptomItemLabel : "新增症狀觀察項目";
   document.querySelector("#modelFeatureLabel").textContent = currentLang === "en" ? i18n.en.ui.modelFeatureLabel : "模型特徵";
   document.querySelector("#validationNote").textContent = currentLang === "en" ? i18n.en.ui.validationNote : "以上為內部 PoC 研究資料與既定判定設定下的模型表現，不是個人罹癌機率，也不代表每份個人報告的準確率。";
   document.querySelector("#validationInfoBtn").textContent = currentLang === "en" ? i18n.en.ui.validationInfo : "了解模型驗證方式";
@@ -577,7 +748,8 @@ function getCurrentModuleIndex() {
 function getModuleFeedback(fromModuleId, toModuleId) {
   const feedback = {
     consent: "已完成知情同意確認。接下來會整理基本資料。",
-    basic: "已完成基本資料。接下來會詢問與生活及健康狀況相關的問題。",
+    basic: "已完成基本資料。接下來會依身體系統詢問最近三個月的症狀。",
+    symptoms: "已完成近期症狀整理。接下來會繼續詢問其他健康資訊。",
     female: "已完成女性相關資訊。接下來會詢問菸草與環境暴露。",
     exposure: "已完成菸草與環境暴露評估。接下來會詢問近期壓力、睡眠與情緒狀況。",
     mental: "已完成心理健康評估。接下來會詢問飲食習慣。",
@@ -606,7 +778,7 @@ function renderConsentNotice() {
           <dl>
             <div><dt>Collector</dt><dd>EG BioMed Co. Ltd.</dd></div>
             <div><dt>Purpose</dt><dd>Cancer-related health risk factor research, personalized health information summary generation, and model training validation</dd></div>
-            <div><dt>Data categories</dt><dd>Basic information (age, sex, height, weight), health information (medical history, family history, and lifestyle habits), and email</dd></div>
+            <div><dt>Data categories</dt><dd>Basic information (age, sex, height, weight), health information (recent symptoms, medical history, family history, and lifestyle habits), and email</dd></div>
             <div><dt>Storage</dt><dd>Microsoft cloud servers in the United States, compliant with GDPR and SOC 2 Type II security standards</dd></div>
             <div><dt>Retention</dt><dd>5 years from the date of completion, then destroyed or de-identified</dd></div>
             <div><dt>Users</dt><dd>Our research team. Data will not be sold or provided to third parties for commercial purposes.</dd></div>
@@ -639,7 +811,7 @@ function renderConsentNotice() {
         <dl>
           <div><dt>收集機構</dt><dd>愛立基生醫股份有限公司（EG BioMed Co. Ltd.）</dd></div>
           <div><dt>收集目的</dt><dd>癌症相關健康風險因子研究、個人化健康資訊摘要產製及模型訓練驗證</dd></div>
-          <div><dt>個資類別</dt><dd>基本資料（年齡、性別、身高體重）、健康資訊（病史、家族史、生活習慣）、Email</dd></div>
+          <div><dt>個資類別</dt><dd>基本資料（年齡、性別、身高體重）、健康資訊（近期症狀、病史、家族史、生活習慣）、Email</dd></div>
           <div><dt>儲存位置</dt><dd>Microsoft 雲端伺服器（美國），符合 GDPR 及 SOC 2 Type II 安全標準</dd></div>
           <div><dt>保存期限</dt><dd>自填寫日起 5 年，期滿後銷毀或去識別化處理</dd></div>
           <div><dt>利用對象</dt><dd>本公司研究團隊，不對外販售或提供予第三方商業用途</dd></div>
@@ -680,7 +852,8 @@ function renderModules() {
 function renderQuestion() {
   const question = getCurrentQuestion();
   parseCard.hidden = true;
-  multiSelection = new Set();
+  const savedValue = question ? answers[question.field]?.value : null;
+  multiSelection = new Set(Array.isArray(savedValue) ? savedValue : []);
 
   if (!question) {
     renderConfirmation();
@@ -694,7 +867,11 @@ function renderQuestion() {
   const cannotSkip = question.id === "consent_acknowledgement" || question.type === "email";
   skipBtn.hidden = !question.required || cannotSkip;
   skipBtn.disabled = cannotSkip;
-  guideMessage.textContent = currentIndex === 0 ? ui("guideIntro") : ui("guideDefault");
+  guideMessage.textContent = question.module === "symptoms"
+    ? (currentLang === "en"
+      ? "I will help you review recent symptoms by body system. Select all symptoms that match your situation."
+      : "接下來會依身體系統整理近期症狀，請勾選所有符合您狀況的項目。")
+    : currentIndex === 0 ? ui("guideIntro") : ui("guideDefault");
 
   const activeQuestions = getActiveQuestions();
   const progress = Math.round(((currentIndex + 1) / activeQuestions.length) * 100);
@@ -708,6 +885,15 @@ function renderQuestion() {
     ${moduleFeedback ? `<p class="module-feedback">${moduleFeedback}</p>` : ""}
     <p class="question-meta">${currentLang === "en" ? `${ui("questionCount")} ${currentIndex + 1} ${ui("of")} ${activeQuestions.length}` : `第 ${currentIndex + 1} 題 / 共 ${activeQuestions.length} 題`}</p>
     <h2 class="question-title">${questionCopy.title}${question.required ? '<span class="required-mark"> *</span>' : ""}</h2>
+    ${question.isSymptomGroup ? `
+      <div class="symptom-reminder" role="note">
+        <strong>${currentLang === "en" ? "How to answer" : "填答提醒"}</strong>
+        <p>${currentLang === "en" ? symptomReminderEn : symptomReminderZh}</p>
+        <p>${currentLang === "en"
+          ? "On this page, select the symptom items directly. If none apply, select “None of the above.”"
+          : "本頁以症狀項目呈現，請直接勾選符合的項目；若都沒有，請選「以上皆無」。"}</p>
+      </div>
+    ` : ""}
     <p class="question-note">${questionCopy.note}</p>
     ${question.id === "consent_acknowledgement" ? renderConsentNotice() : ""}
   `;
@@ -891,32 +1077,50 @@ function renderQuickInput(question) {
 
   if (question.type === "multi") {
     const isConsentQuestion = question.id === "consent_acknowledgement";
+    const isSymptomQuestion = question.isSymptomGroup === true;
+    const visibleOptions = question.options.filter((option) => {
+      if (!isSymptomQuestion || getAnswerValue(answers, "demographics.sex") === "女性") return true;
+      const definition = question.symptomDefinitions?.find(([label]) => label === option);
+      return !definition?.[3];
+    });
     quickOptions.innerHTML = `
       ${isConsentQuestion ? `<div class="consent-option-hint" id="consentOptionHint"></div>` : ""}
-      <div class="multi-options">
-        ${question.options.map((option) => `
-          <button class="option-button option-button--multi${isConsentQuestion ? " option-button--consent" : ""}" type="button" data-value="${option}" aria-pressed="false">${tx(option)}</button>
+      <div class="multi-options${isSymptomQuestion ? " multi-options--symptoms" : ""}">
+        ${visibleOptions.map((option) => `
+          <button class="option-button option-button--multi${isConsentQuestion ? " option-button--consent" : ""}${isSymptomQuestion ? " option-button--symptom" : ""}${option === question.noneOption ? " option-button--none" : ""}" type="button" data-value="${option}" aria-pressed="false">${tx(option)}</button>
         `).join("")}
       </div>
       <button class="secondary-action" id="saveMultiBtn" type="button">${isConsentQuestion ? (currentLang === "en" ? i18n.en.ui.consentContinue : "三項都已勾選，繼續填寫") : ui("saveContinue")}</button>
     `;
+
+    const updateMultiButtons = () => {
+      quickOptions.querySelectorAll(".option-button--multi").forEach((button) => {
+        const selected = multiSelection.has(button.dataset.value);
+        button.classList.toggle("is-selected", selected);
+        button.setAttribute("aria-pressed", String(selected));
+      });
+    };
 
     quickOptions.querySelectorAll(".option-button--multi").forEach((button) => {
       button.addEventListener("click", () => {
         const value = button.dataset.value;
         if (multiSelection.has(value)) {
           multiSelection.delete(value);
+        } else if (isSymptomQuestion && value === question.noneOption) {
+          multiSelection.clear();
+          multiSelection.add(value);
         } else {
+          if (isSymptomQuestion) multiSelection.delete(question.noneOption);
           multiSelection.add(value);
         }
-        button.classList.toggle("is-selected", multiSelection.has(value));
-        button.setAttribute("aria-pressed", String(multiSelection.has(value)));
+        updateMultiButtons();
         if (isConsentQuestion) {
           const saveButton = document.querySelector("#saveMultiBtn");
           if (saveButton) saveButton.disabled = !consentNoticeRead || multiSelection.size < (question.minSelected || 1);
         }
       });
     });
+    updateMultiButtons();
 
     document.querySelector("#saveMultiBtn").addEventListener("click", () => {
       const selected = [...multiSelection];
@@ -1309,7 +1513,37 @@ function buildSubmissionRows() {
   ]);
 }
 
-function buildExcelRow(optimizedFeatureRow, submittedAt) {
+function buildSymptomFeatureRow() {
+  const sex = getAnswerValue(answers, "demographics.sex");
+  return symptomGroups.reduce((row, group) => {
+    const answerEntry = answers[group.field];
+    const selected = Array.isArray(answerEntry?.value) ? answerEntry.value : [];
+    const isMissing = !answerEntry || answerEntry.source === "uncertain";
+    group.options.forEach(([label, , column, femaleOnly]) => {
+      const notApplicable = (group.femaleOnly || femaleOnly) && sex !== "女性";
+      row[column] = notApplicable || isMissing ? -1 : selected.includes(label) ? 1 : 0;
+    });
+    return row;
+  }, {});
+}
+
+function buildSymptomAnswers() {
+  return symptomGroups.map((group) => {
+    const entry = answers[group.field];
+    const selected = Array.isArray(entry?.value) ? entry.value : [];
+    return {
+      category_id: group.id,
+      category_zh: group.title,
+      category_en: group.titleEn,
+      answer_status: !entry || entry.source === "uncertain"
+        ? "unknown"
+        : selected.includes(symptomNoneOption) ? "none" : "reported",
+      selected_symptoms: selected.filter((value) => value !== symptomNoneOption)
+    };
+  });
+}
+
+function buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symptomAnswers) {
   const symptomEntry = Object.values(answers).find((entry) => entry.field === "recent_health.recent_discomfort");
   const personalCancerTypeEntry = Object.values(answers).find((entry) => entry.field === "medical_history.personal_cancer_types");
   const structured = symptomEntry?.structured || {};
@@ -1325,6 +1559,8 @@ function buildExcelRow(optimizedFeatureRow, submittedAt) {
     language: currentLang,
     report_language: currentLang === "en" ? "en" : "zh-Hant",
     personal_cancer_types: personalCancerTypes,
+    symptom_positive_count: Object.values(symptomFeatureRow).filter((value) => value === 1).length,
+    symptom_answers_json: JSON.stringify(symptomAnswers),
     recent_discomfort_text: symptomEntry?.value ? String(symptomEntry.value) : "",
     recent_discomfort_no_symptom: structured.no_symptom === true ? 1 : 0,
     recent_discomfort_body_parts: join(structured.body_parts),
@@ -1351,6 +1587,8 @@ function storeSubmissionForIntegration() {
   const rows = buildSubmissionRows();
   const optimizedFeatureRow = buildOptimizedFeatureRow();
   const aiApiFeatureRow = buildAiApiFeatureRow(optimizedFeatureRow);
+  const symptomFeatureRow = buildSymptomFeatureRow();
+  const symptomAnswers = buildSymptomAnswers();
   const missingColumns = optimizedFeatureColumns.filter((column) => optimizedFeatureRow[column] === "" && column !== "score");
   const submission = {
     submitted_at: submittedAt,
@@ -1361,7 +1599,10 @@ function storeSubmissionForIntegration() {
     optimized_feature_columns: optimizedFeatureColumns,
     optimized_feature_row: optimizedFeatureRow,
     ai_api_feature_row: aiApiFeatureRow,
-    excel_row: buildExcelRow(optimizedFeatureRow, submittedAt),
+    symptom_feature_columns: symptomFeatureColumns,
+    symptom_feature_row: symptomFeatureRow,
+    symptom_answers: symptomAnswers,
+    excel_row: buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symptomAnswers),
     data_quality: {
       missing_columns: missingColumns,
       contradiction_warnings: checkOptimizedFeatureRow(optimizedFeatureRow)
@@ -1472,6 +1713,9 @@ async function renderResult() {
         columns: submission.optimized_feature_columns,
         row: submission.optimized_feature_row,
         ai_api_row: submission.ai_api_feature_row,
+        symptom_columns: submission.symptom_feature_columns,
+        symptom_row: submission.symptom_feature_row,
+        symptom_answers: submission.symptom_answers,
         data_quality: submission.data_quality
       })}</script>
     </div>
