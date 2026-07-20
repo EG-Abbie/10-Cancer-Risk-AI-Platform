@@ -1514,14 +1514,11 @@ function buildSubmissionRows() {
 }
 
 function buildSymptomFeatureRow() {
-  const sex = getAnswerValue(answers, "demographics.sex");
   return symptomGroups.reduce((row, group) => {
     const answerEntry = answers[group.field];
     const selected = Array.isArray(answerEntry?.value) ? answerEntry.value : [];
-    const isMissing = !answerEntry || answerEntry.source === "uncertain";
-    group.options.forEach(([label, , column, femaleOnly]) => {
-      const notApplicable = (group.femaleOnly || femaleOnly) && sex !== "女性";
-      row[column] = notApplicable || isMissing ? -1 : selected.includes(label) ? 1 : 0;
+    group.options.forEach(([label, , column]) => {
+      row[column] = selected.includes(label) ? 1 : 0;
     });
     return row;
   }, {});
@@ -1554,6 +1551,7 @@ function buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symp
 
   return {
     ...optimizedFeatureRow,
+    ...symptomFeatureRow,
     submitted_at: submittedAt,
     email: getAnswerValue(answers, "contact.email") || "",
     language: currentLang,
