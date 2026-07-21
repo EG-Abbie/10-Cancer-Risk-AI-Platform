@@ -868,6 +868,9 @@ html[lang="en"] h1 {
   padding: 16px 16px 16px 58px;
   font-size: 16px;
   line-height: 1.65;
+  border: 2px solid #6f9f95;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(11, 95, 88, 0.08);
 }
 
 .option-button--consent::before {
@@ -875,23 +878,23 @@ html[lang="en"] h1 {
   position: absolute;
   left: 18px;
   top: 50%;
-  width: 24px;
-  height: 24px;
-  border: 2px solid #9eb1ac;
+  width: 26px;
+  height: 26px;
+  border: 3px solid #0b5f58;
   border-radius: 6px;
   background: #fff;
   transform: translateY(-50%);
 }
 
 .option-button--consent.is-selected::before {
-  border-color: var(--teal);
-  background: var(--teal);
+  border-color: #075e57;
+  background: #075e57;
 }
 
 .option-button--consent.is-selected::after {
   content: "✓";
   position: absolute;
-  left: 24px;
+  left: 25px;
   top: 50%;
   color: #fff;
   font-weight: 900;
@@ -991,8 +994,16 @@ html[lang="en"] h1 {
 }
 
 .option-button--consent:disabled {
-  opacity: 0.64;
-  background: #f3f5f2;
+  opacity: 1;
+  color: #485552;
+  border-color: #aab6b3;
+  background: #f1f3f2;
+  box-shadow: none;
+}
+
+.option-button--consent:disabled::before {
+  border-color: #6f7e7a;
+  background: #ffffff;
 }
 
 .option-button.is-selected {
@@ -1387,13 +1398,29 @@ input[type="number"] {
 }
 
 .consent-notice {
-  display: grid;
-  gap: 14px;
+  position: relative;
+  display: block;
   margin-top: 18px;
-  padding: 16px;
+  padding: 0;
   border: 1px solid #bfd6d2;
   border-radius: 8px;
   background: #f7fbf8;
+  overflow: hidden;
+}
+
+.consent-scroll-panel {
+  display: grid;
+  gap: 14px;
+  max-height: min(540px, 58vh);
+  padding: 16px 16px 104px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.consent-scroll-panel:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.34);
+  outline-offset: -3px;
 }
 
 .consent-step-guide {
@@ -1436,6 +1463,42 @@ input[type="number"] {
   justify-self: stretch;
   min-height: 56px;
   font-size: 17px;
+}
+
+.consent-read-dock {
+  position: absolute;
+  z-index: 4;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  gap: 8px;
+  padding: 13px 16px 16px;
+  border-top: 1px solid #b8ccc7;
+  background: linear-gradient(180deg, rgba(247, 251, 248, 0.9), #f7fbf8 28%);
+  box-shadow: 0 -12px 24px rgba(25, 57, 52, 0.12);
+}
+
+.consent-scroll-status {
+  color: #4f5e5a;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.consent-read-action:disabled {
+  border: 1px solid #a9b3b0;
+  background: #d6dcda;
+  color: #53605d;
+  opacity: 1;
+}
+
+.consent-read-action.is-ready {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.2);
 }
 
 .consent-option-hint {
@@ -2130,7 +2193,17 @@ pre {
   }
 
   .consent-notice {
+    padding: 0;
+  }
+
+  .consent-scroll-panel {
     gap: 12px;
+    max-height: min(500px, 60dvh);
+    padding: 12px 12px 110px;
+  }
+
+  .consent-read-dock {
+    padding: 11px 12px 13px;
   }
 
   .consent-notice__section {

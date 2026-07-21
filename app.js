@@ -211,8 +211,6 @@ const questions = [
   { id: "menarche_age", module: "female", type: "single", required: true, title: "初經（第一次月經）來潮年齡", note: "若不確定，可使用下方不確定選項。", field: "female_health.menarche_age", options: ["12 歲以前（含 12 歲）", "13 歲以後（含 13 歲）"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
   { id: "menopause_status", module: "female", type: "single", required: true, title: "目前停經（更年期）狀態", note: "請選擇最接近目前狀況的選項。", field: "female_health.menopause_status", options: ["尚未停經（仍有月經）", "已停經（55 歲或以前停經）", "已停經（55 歲或以後停經）", "已切除子宮或卵巢"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
   { id: "first_pregnancy_age", module: "female", type: "single", required: false, title: "第一胎懷孕年齡", note: "若未曾懷孕可選從未懷孕。", field: "female_health.first_pregnancy_age", options: ["從未懷孕", "20 歲以下", "20-30 歲", "31-35 歲", "36 歲以上"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
-  { id: "pregnancy_count", module: "female", type: "number", required: false, title: "曾懷孕幾次？", note: "含流產、人工流產、正常生產；0 表示未曾懷孕。", field: "female_health.pregnancy_count", placeholder: "值必須是數字", appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
-  { id: "live_birth_count", module: "female", type: "number", required: false, title: "生產胎數？", note: "成功分娩之次數；0 表示未曾生產。", field: "female_health.live_birth_count", placeholder: "值必須是數字", appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
   { id: "breastfeeding", module: "female", type: "single", required: true, title: "產後是否曾哺餵母乳？若有，哺乳時間多長？", note: "若尚未生產，此題請選不適用。", field: "female_health.breastfeeding_history", options: ["從未哺乳", "有哺乳，但少於 6 個月", "有哺乳，超過 6 個月（含 6 個月）", "尚未生產，此題不適用"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
   { id: "pap_smear", module: "female", type: "single", required: true, title: "是否曾做過子宮頸抹片檢查？結果如何？", note: "此題用於子宮頸相關風險因子整理。", field: "female_health.pap_smear_history", options: ["是，歷次結果均正常", "是，曾有異常報告（如 CIN、HPV 陽性等）", "否，從未做過"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
   { id: "hormone_medication", module: "female", type: "single", required: true, title: "過去是否曾使用賀爾蒙藥物？", note: "包含避孕藥、更年期賀爾蒙補充療法 HRT 等。", field: "female_health.hormone_medication", options: ["是，使用超過 1 年", "是，使用不到 1 年", "否，從未使用"], appliesIf: (answers) => getAnswerValue(answers, "demographics.sex") === "女性" },
@@ -230,8 +228,8 @@ const questions = [
   { id: "sleep_problem", module: "mental", type: "single", required: true, title: "過去一個月，每週睡不好或失眠的頻率", note: "請以最近一個月的一般狀況回答。", field: "mental_health.weekly_sleep_problem_frequency", options: ["不到 1 天", "2-3 天", "4-5 天", "幾乎每天"] },
   { id: "low_mood", module: "mental", type: "single", required: true, title: "過去一個月，每週情緒低落或憂鬱的頻率", note: "此題僅作為健康風險因子整理，不是心理診斷。", field: "mental_health.weekly_low_mood_frequency", options: ["不到 1 天", "2-3 天", "4-5 天", "幾乎每天"] },
 
-  { id: "diet_type", module: "diet", type: "single", required: true, title: "目前的飲食習慣為何？", note: "請選擇最接近您長期飲食型態的一項。", field: "diet.current_diet_type", options: ["葷食（無特別限制）", "全素", "蛋奶素", "蛋素", "奶素", "植物五辛素", "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）", "彈性蔬食（以植物性食物為主，但偶爾食用肉類、魚類或海鮮）", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）"] },
-  { id: "frequent_foods", module: "diet", type: "multi", required: true, title: "以下哪些是您經常會食用的？", note: "可複選，若都不常食用可選無固定或少量。", field: "diet.frequent_foods", options: ["飲酒（每週至少一次）", "燒烤或油炸食品", "紅肉（牛、羊、豬等）", "醃漬類食品（泡菜、鹹魚等）", "甜食或高糖零食", "含糖飲料", "高脂肪食物（速食、肥肉等）", "乳製品（起司、優格等）", "蔬菜水果（每日攝取）", "咖啡（每週至少 3 次）", "茶（每週至少 3 次）", "素食（以蔬食為主）", "無固定或少量"] },
+  { id: "diet_type", module: "diet", type: "single", required: true, title: "目前的飲食習慣為何？", note: "請選擇最接近您長期飲食型態的一項。若以蔬食為主但仍會吃肉類或海鮮，請選「彈性蔬食」；只有不吃肉類與海鮮者，才請選全素、蛋奶素、蛋素、奶素或植物五辛素。", field: "diet.current_diet_type", options: ["葷食（會食用肉類或海鮮，無特別飲食限制）", "全素", "蛋奶素", "蛋素", "奶素", "植物五辛素", "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）", "彈性蔬食（以植物性食物為主，但仍會食用肉類、魚類或海鮮）", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）"] },
+  { id: "frequent_foods", module: "diet", type: "multi", required: true, title: "以下哪些是您經常會食用的？", note: "可複選。「素食飲食」僅限平常不吃肉類與海鮮者；若仍會吃肉類或海鮮，但蔬菜比例較高，請勿勾選該項，可依實際情況勾選「蔬菜水果（每日攝取）」。", field: "diet.frequent_foods", options: ["飲酒（每週至少一次）", "燒烤或油炸食品", "紅肉（牛、羊、豬等）", "醃漬類食品（泡菜、鹹魚等）", "甜食或高糖零食", "含糖飲料", "高脂肪食物（速食、肥肉等）", "乳製品（起司、優格等）", "蔬菜水果（每日攝取）", "咖啡（每週至少 3 次）", "茶（每週至少 3 次）", "素食飲食（不吃肉類與海鮮；含全素、蛋奶素、蛋素、奶素或植物五辛素）", "無固定或少量"] },
   { id: "milk_daily", module: "diet", type: "single", required: true, title: "是否每天飲用牛奶（至少一杯 240ml，含保久乳）？", note: "若偶爾才喝，請選否。", field: "diet.daily_milk", options: ["是，每天飲用", "否，偶爾或不飲用"] },
   { id: "soy_products", module: "diet", type: "single", required: true, title: "是否經常食用豆類製品？", note: "例如豆漿、豆腐、豆干、毛豆等，每週 3 次以上。", field: "diet.soy_products_3x_week", options: ["是，每週 3 次以上", "否，較少食用"] },
   { id: "probiotics", module: "diet", type: "single", required: true, title: "是否規律補充益生菌？", note: "例如優酪乳、優格、益生菌補充品等，每週 3 次以上。", field: "diet.probiotics_3x_week", options: ["是，每週 3 次以上", "否，較少補充"] },
@@ -319,11 +317,13 @@ const i18n = {
       multiRequired: "Please select at least one option, or use \"Not sure how to answer\".",
       consentRequired: "Please select all three confirmation statements before continuing.",
       consentStepsTitle: "How to complete this page",
-      consentStep1: "Read the notice below",
-      consentStep2: "Press the large button after reading",
+      consentStep1: "Scroll through the complete notice below",
+      consentStep2: "After reaching the bottom, press the unlocked button",
       consentStep3: "Select all three confirmation items, then continue",
-      consentOptionsLocked: "The three confirmation items are locked. Please press the button above after reading the notice.",
+      consentOptionsLocked: "The three confirmation items are locked. Scroll through the notice and press the floating button when it becomes available.",
       consentOptionsReady: "Now select all three confirmation items below.",
+      consentScrollPrompt: "Scroll to the bottom to finish reading and unlock this button.",
+      consentScrollReady: "You have reached the end. Press the button to continue.",
       consentUnlock: "I have read this notice. Let me select the consent items",
       consentUnlocked: "Consent items are now available",
       consentContinue: "All three items are selected. Continue",
@@ -392,8 +392,6 @@ const i18n = {
       menarche_age: ["Age at first menstruation", "If unsure, you may use the not sure option."],
       menopause_status: ["Current menopause status", "Please select the option closest to your current situation."],
       first_pregnancy_age: ["Age at first pregnancy", "If you have never been pregnant, select never pregnant."],
-      pregnancy_count: ["How many times have you been pregnant?", "Include miscarriage, induced abortion, and live birth. Enter 0 if never pregnant.", "Must be a number"],
-      live_birth_count: ["Number of live births", "Number of successful deliveries. Enter 0 if never given birth.", "Must be a number"],
       breastfeeding: ["Have you breastfed after childbirth? If yes, for how long?", "If you have not given birth, select not applicable."],
       pap_smear: ["Have you ever had a Pap smear? What was the result?", "This is used to organize cervical cancer-related risk factors."],
       hormone_medication: ["Have you ever used hormone medication?", "Includes contraceptive pills and menopausal hormone replacement therapy (HRT)."],
@@ -408,8 +406,8 @@ const i18n = {
       stress: ["In the past month, how often did you feel tense or anxious each week?", "Please answer based on your general situation in the past month."],
       sleep_problem: ["In the past month, how often did you sleep poorly or have insomnia each week?", "Please answer based on your general situation in the past month."],
       low_mood: ["In the past month, how often did you feel low or depressed each week?", "This is only for health risk factor organization and is not a mental health diagnosis."],
-      diet_type: ["What is your current dietary pattern?", "Please select the option closest to your long-term dietary pattern."],
-      frequent_foods: ["Which of the following do you often consume?", "You may select multiple. If none are frequent, select no fixed or small amount."],
+      diet_type: ["What is your current dietary pattern?", "Choose the option closest to your long-term pattern. If you mainly eat plant-based foods but still consume meat or seafood, choose Flexitarian. Choose a vegetarian category only if you do not eat meat or seafood."],
+      frequent_foods: ["Which of the following do you often consume?", "You may select multiple. Select Vegetarian diet only if you do not eat meat or seafood. If you still eat meat or seafood but consume plenty of vegetables, select Vegetables and fruits instead."],
       milk_daily: ["Do you drink milk every day (at least one 240 ml cup, including shelf-stable milk)?", "If you only drink occasionally, select no."],
       soy_products: ["Do you often consume soy products?", "For example, soy milk, tofu, dried tofu, edamame, at least 3 times per week."],
       probiotics: ["Do you regularly take probiotics?", "For example, yogurt drinks, yogurt, or probiotic supplements, at least 3 times per week."],
@@ -436,9 +434,9 @@ const i18n = {
       "是，已戒菸": "Yes, quit smoking", "否，仍在抽菸": "No, still smoking",
       "少於一次": "Less than once", "每週 1-3 次": "1-3 times per week", "每週 4-6 次": "4-6 times per week", "每週 6 次以上": "6 or more times per week",
       "不到 1 天": "Less than 1 day", "2-3 天": "2-3 days", "4-5 天": "4-5 days", "幾乎每天": "Almost every day",
-      "葷食（無特別限制）": "Omnivorous diet (no specific restriction)", "全素": "Vegan", "蛋奶素": "Ovo-lacto vegetarian", "蛋素": "Ovo vegetarian", "奶素": "Lacto vegetarian", "植物五辛素": "Vegetarian including five pungent vegetables",
-      "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）": "Mediterranean diet", "彈性蔬食（以植物性食物為主，但偶爾食用肉類、魚類或海鮮）": "Flexitarian diet", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）": "Whole-food plant-based diet", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）": "High fruit/vegetable, low-salt diet", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）": "Ketogenic diet", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）": "Low-carbohydrate diet", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）": "Intermittent fasting",
-      "飲酒（每週至少一次）": "Alcohol (at least once per week)", "燒烤或油炸食品": "Grilled or fried foods", "紅肉（牛、羊、豬等）": "Red meat (beef, lamb, pork, etc.)", "醃漬類食品（泡菜、鹹魚等）": "Pickled foods", "甜食或高糖零食": "Sweets or high-sugar snacks", "含糖飲料": "Sugary drinks", "高脂肪食物（速食、肥肉等）": "High-fat foods", "乳製品（起司、優格等）": "Dairy products", "蔬菜水果（每日攝取）": "Vegetables and fruits (daily)", "咖啡（每週至少 3 次）": "Coffee (at least 3 times per week)", "茶（每週至少 3 次）": "Tea (at least 3 times per week)", "素食（以蔬食為主）": "Vegetarian or mostly plant-based", "無固定或少量": "No fixed pattern or small amount",
+      "葷食（會食用肉類或海鮮，無特別飲食限制）": "Omnivorous diet (includes meat or seafood; no specific dietary restriction)", "全素": "Vegan", "蛋奶素": "Ovo-lacto vegetarian", "蛋素": "Ovo vegetarian", "奶素": "Lacto vegetarian", "植物五辛素": "Vegetarian including five pungent vegetables",
+      "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）": "Mediterranean diet", "彈性蔬食（以植物性食物為主，但仍會食用肉類、魚類或海鮮）": "Flexitarian diet (mostly plant-based but still includes meat, fish, or seafood)", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）": "Whole-food plant-based diet", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）": "High fruit/vegetable, low-salt diet", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）": "Ketogenic diet", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）": "Low-carbohydrate diet", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）": "Intermittent fasting",
+      "飲酒（每週至少一次）": "Alcohol (at least once per week)", "燒烤或油炸食品": "Grilled or fried foods", "紅肉（牛、羊、豬等）": "Red meat (beef, lamb, pork, etc.)", "醃漬類食品（泡菜、鹹魚等）": "Pickled foods", "甜食或高糖零食": "Sweets or high-sugar snacks", "含糖飲料": "Sugary drinks", "高脂肪食物（速食、肥肉等）": "High-fat foods", "乳製品（起司、優格等）": "Dairy products", "蔬菜水果（每日攝取）": "Vegetables and fruits (daily)", "咖啡（每週至少 3 次）": "Coffee (at least 3 times per week)", "茶（每週至少 3 次）": "Tea (at least 3 times per week)", "素食飲食（不吃肉類與海鮮；含全素、蛋奶素、蛋素、奶素或植物五辛素）": "Vegetarian diet (no meat or seafood; includes vegan, ovo-lacto, ovo, lacto, or five-pungent vegetarian diets)", "無固定或少量": "No fixed pattern or small amount",
       "是，每天飲用": "Yes, daily", "否，偶爾或不飲用": "No, occasional or none", "是，每週 3 次以上": "Yes, at least 3 times per week", "否，較少食用": "No, rarely", "否，較少補充": "No, rarely",
       "是，目前正在治療或追蹤中": "Yes, currently under treatment or follow-up",
       "是，過去曾被診斷，目前已完成治療或追蹤": "Yes, diagnosed in the past; treatment or follow-up has been completed",
@@ -476,6 +474,7 @@ let multiSelection = new Set();
 let moduleFeedback = "";
 let llmDraft = null;
 let consentNoticeRead = false;
+let consentNoticeReachedEnd = false;
 const savedLang = localStorage.getItem("egbiomed_lang");
 let currentLang = savedLang || ((navigator.language || "").toLowerCase().startsWith("zh") ? "zh" : "en");
 
@@ -511,6 +510,8 @@ const zhUi = {
   saveContinue: "儲存並繼續",
   consentUnlock: "我已閱讀上述告知事項",
   consentUnlocked: "已可勾選同意事項",
+  consentScrollPrompt: "請向下滑動閱讀完整內容，即可開啟此按鈕。",
+  consentScrollReady: "已閱讀至最後，請按下按鈕繼續。",
   submitReview: "確認並送出",
   notFilled: "未填寫"
 };
@@ -765,6 +766,7 @@ function renderConsentNotice() {
   if (currentLang === "en") {
     return `
       <section class="consent-notice" aria-labelledby="consentNoticeTitle">
+        <div class="consent-scroll-panel" id="consentScrollPanel" tabindex="0" aria-label="Consent notice. Scroll to the bottom to continue.">
         <div class="consent-step-guide" aria-label="${i18n.en.ui.consentStepsTitle}">
           <strong>${i18n.en.ui.consentStepsTitle}</strong>
           <ol>
@@ -792,17 +794,22 @@ function renderConsentNotice() {
           <p>This service uses models at an internal proof-of-concept stage. Results may be affected by research data and methodological limitations and require continued validation. The report provides health risk factor organization and health education information, not a diagnosis or screening result.</p>
           <button class="text-link inline-info-link" type="button" data-open-service-info>View full service information and limitations</button>
         </div>
-        <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">${i18n.en.ui.consentUnlock}</button>
+        </div>
+        <div class="consent-read-dock">
+          <span class="consent-scroll-status" id="consentScrollStatus" aria-live="polite">${ui("consentScrollPrompt")}</span>
+          <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button" disabled>${i18n.en.ui.consentUnlock}</button>
+        </div>
       </section>
     `;
   }
   return `
     <section class="consent-notice" aria-labelledby="consentNoticeTitle">
+      <div class="consent-scroll-panel" id="consentScrollPanel" tabindex="0" aria-label="知情同意告知事項，請滑動至最後以繼續">
       <div class="consent-step-guide" aria-label="本頁操作方式">
         <strong>請依照以下 3 個步驟完成知情同意</strong>
         <ol>
-          <li>先閱讀下方告知事項</li>
-          <li>閱讀後按下大型按鈕</li>
+            <li>在區塊內向下滑動，完整閱讀告知事項</li>
+            <li>滑到最後後，按下已開啟的大型按鈕</li>
           <li>勾選三個確認項目，再繼續填寫</li>
         </ol>
       </div>
@@ -825,7 +832,11 @@ function renderConsentNotice() {
         <p>本服務使用內部概念驗證階段的模型，結果會受研究資料與方法限制影響，並仍需持續驗證。報告提供健康風險因子整理與健康教育資訊，不是診斷或篩檢結果。</p>
         <button class="text-link inline-info-link" type="button" data-open-service-info>查看完整服務說明與限制</button>
       </div>
-      <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button">我已閱讀上述告知事項</button>
+      </div>
+      <div class="consent-read-dock">
+        <span class="consent-scroll-status" id="consentScrollStatus" aria-live="polite">${ui("consentScrollPrompt")}</span>
+        <button class="secondary-action consent-read-action" id="unlockConsentBtn" type="button" disabled>我已閱讀上述告知事項</button>
+      </div>
     </section>
   `;
 }
@@ -910,6 +921,9 @@ function setupConsentGate(question) {
   if (question.id !== "consent_acknowledgement") return;
   const unlockButton = document.querySelector("#unlockConsentBtn");
   const optionHint = document.querySelector("#consentOptionHint");
+  const scrollPanel = document.querySelector("#consentScrollPanel");
+  const scrollStatus = document.querySelector("#consentScrollStatus");
+  consentNoticeReachedEnd = consentNoticeReachedEnd || consentNoticeRead;
   const updateConsentControls = () => {
     document.querySelectorAll(".option-button").forEach((button) => {
       button.disabled = !consentNoticeRead;
@@ -920,18 +934,35 @@ function setupConsentGate(question) {
     if (optionHint) {
       optionHint.textContent = consentNoticeRead
         ? (currentLang === "en" ? i18n.en.ui.consentOptionsReady : "現在請勾選下方三個確認項目。三項都勾選後，再按「三項都已勾選，繼續填寫」。")
-        : (currentLang === "en" ? i18n.en.ui.consentOptionsLocked : "下方三個確認項目目前尚未開啟。請先閱讀上方告知事項，並按下「我已閱讀，開始勾選同意事項」。");
+        : (currentLang === "en" ? i18n.en.ui.consentOptionsLocked : "下方三個確認項目目前尚未開啟。請在上方閱讀區向下滑到最後，再按下懸浮按鈕。");
       optionHint.classList.toggle("is-ready", consentNoticeRead);
     }
     if (unlockButton) {
-      unlockButton.disabled = consentNoticeRead;
+      unlockButton.disabled = consentNoticeRead || !consentNoticeReachedEnd;
+      unlockButton.classList.toggle("is-ready", consentNoticeReachedEnd && !consentNoticeRead);
       unlockButton.textContent = consentNoticeRead
         ? ui("consentUnlocked")
         : (currentLang === "en" ? ui("consentUnlock") : "我已閱讀，開始勾選同意事項");
     }
+    if (scrollStatus) {
+      scrollStatus.textContent = consentNoticeRead
+        ? (currentLang === "en" ? i18n.en.ui.consentOptionsReady : "已完成閱讀，請勾選下方三個確認項目。")
+        : ui(consentNoticeReachedEnd ? "consentScrollReady" : "consentScrollPrompt");
+    }
   };
   updateConsentControls();
+  const checkScrollProgress = () => {
+    if (!scrollPanel || consentNoticeReachedEnd) return;
+    const remaining = scrollPanel.scrollHeight - scrollPanel.scrollTop - scrollPanel.clientHeight;
+    if (remaining <= 12) {
+      consentNoticeReachedEnd = true;
+      updateConsentControls();
+    }
+  };
+  scrollPanel?.addEventListener("scroll", checkScrollProgress, { passive: true });
+  requestAnimationFrame(checkScrollProgress);
   unlockButton?.addEventListener("click", () => {
+    if (!consentNoticeReachedEnd) return;
     consentNoticeRead = true;
     updateConsentControls();
     document.querySelector("#consentOptionHint")?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1156,8 +1187,6 @@ function getNumberBounds(question) {
     birth_year: { min: currentYear - 120, max: currentYear, step: 1 },
     height_cm: { min: 100, max: 250, step: 0.1 },
     weight_kg: { min: 20, max: 300, step: 0.1 },
-    pregnancy_count: { min: 0, max: 30, step: 1 },
-    live_birth_count: { min: 0, max: 30, step: 1 }
   };
   return bounds[question.id] || null;
 }
@@ -1379,14 +1408,17 @@ function mapFemaleValue(valueMap, field) {
 
 function buildOptimizedFeatureRow() {
   const sex = getAnswerValue(answers, "demographics.sex");
+  const dietType = getAnswerValue(answers, "diet.current_diet_type");
   const frequentFoods = getAnswerValue(answers, "diet.frequent_foods");
   const foodList = Array.isArray(frequentFoods) ? frequentFoods : [];
   const cookingFrequency = getAnswerValue(answers, "exposure.weekly_cooking_frequency");
   const anxiety = getAnswerValue(answers, "mental_health.weekly_stress_frequency");
   const insomnia = getAnswerValue(answers, "mental_health.weekly_sleep_problem_frequency");
   const depression = getAnswerValue(answers, "mental_health.weekly_low_mood_frequency");
-  const pregnancyCount = normalizeNumber(getAnswerValue(answers, "female_health.pregnancy_count"));
-  const birthCount = normalizeNumber(getAnswerValue(answers, "female_health.live_birth_count"));
+  const firstPregnancyAge = getAnswerValue(answers, "female_health.first_pregnancy_age");
+  const breastfeedingHistory = getAnswerValue(answers, "female_health.breastfeeding_history");
+  const vegetarianDietTypes = ["全素", "蛋奶素", "蛋素", "奶素", "植物五辛素"];
+  const explicitlyVegetarian = vegetarianDietTypes.includes(dietType) || dietType?.startsWith("健康蔬食／全植物飲食");
   const personalCancerHistory = getAnswerValue(answers, "medical_history.personal_cancer_history");
   const row = {
     record_id: `WEB-${Date.now()}`,
@@ -1434,7 +1466,7 @@ function buildOptimizedFeatureRow() {
     depression_freq_missing: depression === "不到 1 天" ? 1 : 0,
     depression_freq: mapFrequency(depression),
     alcohol: foodList.some((item) => item.includes("飲酒")) ? 1 : 0,
-    vegetarian: getAnswerValue(answers, "diet.current_diet_type") !== "葷食（無特別限制）" || foodList.some((item) => item.includes("素食")) ? 1 : 0,
+    vegetarian: explicitlyVegetarian || foodList.some((item) => item.startsWith("素食飲食")) ? 1 : 0,
     grilled_fried_food: foodList.some((item) => item.includes("燒烤") || item.includes("油炸")) ? 1 : 0,
     pickled_food: foodList.some((item) => item.includes("醃漬")) ? 1 : 0,
     red_meat: foodList.some((item) => item.includes("紅肉")) ? 1 : 0,
@@ -1452,8 +1484,8 @@ function buildOptimizedFeatureRow() {
     menarche_early: mapFemaleValue({ "12 歲以前（含 12 歲）": 1, "13 歲以後（含 13 歲）": 0 }, "female_health.menarche_age"),
     menopause_ordinal: mapFemaleValue({ "尚未停經（仍有月經）": 0, "已停經（55 歲或以前停經）": 1, "已停經（55 歲或以後停經）": 2, "已切除子宮或卵巢": 3 }, "female_health.menopause_status"),
     first_pregnancy_age_ordinal: mapFemaleValue({ "從未懷孕": 0, "20 歲以下": 1, "20-30 歲": 2, "31-35 歲": 3, "36 歲以上": 4 }, "female_health.first_pregnancy_age"),
-    num_pregnancies: sex === "女性" ? pregnancyCount ?? 0 : -1,
-    num_births: sex === "女性" ? birthCount ?? 0 : -1,
+    num_pregnancies: sex !== "女性" ? -1 : firstPregnancyAge === "從未懷孕" ? 0 : -1,
+    num_births: sex !== "女性" ? -1 : firstPregnancyAge === "從未懷孕" || breastfeedingHistory === "尚未生產，此題不適用" ? 0 : -1,
     breastfed: mapFemaleValue({ "從未哺乳": 0, "有哺乳，但少於 6 個月": 1, "有哺乳，超過 6 個月（含 6 個月）": 1, "尚未生產，此題不適用": 0 }, "female_health.breastfeeding_history"),
     pap_smear_done: mapFemaleValue({ "是，歷次結果均正常": 1, "是，曾有異常報告（如 CIN、HPV 陽性等）": 1, "否，從未做過": 0 }, "female_health.pap_smear_history"),
     pap_smear_abnormal: mapFemaleValue({ "是，歷次結果均正常": 0, "是，曾有異常報告（如 CIN、HPV 陽性等）": 1, "否，從未做過": 0 }, "female_health.pap_smear_history"),
@@ -1478,17 +1510,12 @@ function checkOptimizedFeatureRow(row) {
   const sex = getAnswerValue(answers, "demographics.sex");
   const smokingEver = getAnswerValue(answers, "exposure.smoking_ever");
   const smokingQuit = getAnswerValue(answers, "exposure.smoking_quit_status");
-  const pregnancyCount = normalizeNumber(getAnswerValue(answers, "female_health.pregnancy_count"));
-  const liveBirthCount = normalizeNumber(getAnswerValue(answers, "female_health.live_birth_count"));
 
   if (sex === "男性" && optimizedFeatureColumns.slice(60, 69).some((column) => row[column] !== -1)) {
     messages.push("男性路徑中不應出現女性相關題組答案。");
   }
   if (smokingEver === "否" && smokingQuit) {
     messages.push("抽菸習慣填否，但仍出現戒菸狀態。");
-  }
-  if (pregnancyCount != null && liveBirthCount != null && liveBirthCount > pregnancyCount) {
-    messages.push("生產胎數大於懷孕次數，需再次確認。");
   }
   return messages;
 }
