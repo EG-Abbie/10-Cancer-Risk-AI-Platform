@@ -64,9 +64,16 @@ function buildFallbackExcelRow(submission) {
   const recentDiscomfortText = findAnswer(submission.rows, "recent_discomfort");
   const personalCancerTypes = findAnswer(submission.rows, "personal_cancer_types");
   const noSymptom = /^(無|沒有|無不適|沒有不舒服|目前沒有|none|no|no symptoms|no discomfort)$/iu.test(recentDiscomfortText.trim());
+  const researchFeatureRow = submission.research_feature_row && typeof submission.research_feature_row === "object"
+    ? submission.research_feature_row
+    : {};
+  const researchExcelFields = Object.fromEntries(
+    Object.entries(researchFeatureRow).map(([column, value]) => [`research_${column}`, value])
+  );
 
   return {
     ...submission.optimized_feature_row,
+    ...researchExcelFields,
     submitted_at: submission.submitted_at || new Date().toISOString(),
     email: submission.email || findAnswer(submission.rows, "email"),
     language: submission.language || "zh",

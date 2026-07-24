@@ -10,7 +10,7 @@ const modules = [
   { id: "female", title: "女性相關資訊", summary: "依性別條件詢問月經、生育、哺乳、子宮頸抹片與荷爾蒙用藥。" },
   { id: "exposure", title: "菸草與環境暴露", summary: "整理抽菸、二手菸、油煙、空污與輻射等暴露因子。" },
   { id: "mental", title: "心理健康", summary: "記錄近期壓力、睡眠與情緒困擾頻率。" },
-  { id: "diet", title: "飲食習慣", summary: "收集飲食型態、常見食物、牛奶、豆製品與益生菌習慣。" },
+  { id: "diet", title: "飲食習慣", summary: "分別整理主要飲食型態、肉類與加工食品、高糖高脂食物、蔬果乳豆類及飲品習慣。" },
   { id: "history", title: "病史與家族史", summary: "確認個人癌症、慢性疾病與家族癌症史。" },
   { id: "contact", title: "聯絡資料", summary: "填寫接收結果報告的 Email。" },
   { id: "confirm", title: "資料確認", summary: "送出前，請確認填答內容。" },
@@ -228,11 +228,11 @@ const questions = [
   { id: "sleep_problem", module: "mental", type: "single", required: true, title: "過去一個月，每週睡不好或失眠的頻率", note: "請以最近一個月的一般狀況回答。", field: "mental_health.weekly_sleep_problem_frequency", options: ["不到 1 天", "2-3 天", "4-5 天", "幾乎每天"] },
   { id: "low_mood", module: "mental", type: "single", required: true, title: "過去一個月，每週情緒低落或憂鬱的頻率", note: "此題僅作為健康風險因子整理，不是心理診斷。", field: "mental_health.weekly_low_mood_frequency", options: ["不到 1 天", "2-3 天", "4-5 天", "幾乎每天"] },
 
-  { id: "diet_type", module: "diet", type: "single", required: true, title: "目前的飲食習慣為何？", note: "請選擇最接近您長期飲食型態的一項。若以蔬食為主但仍會吃肉類或海鮮，請選「彈性蔬食」；只有不吃肉類與海鮮者，才請選全素、蛋奶素、蛋素、奶素或植物五辛素。", field: "diet.current_diet_type", options: ["葷食（會食用肉類或海鮮，無特別飲食限制）", "全素", "蛋奶素", "蛋素", "奶素", "植物五辛素", "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）", "彈性蔬食（以植物性食物為主，但仍會食用肉類、魚類或海鮮）", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）"] },
-  { id: "frequent_foods", module: "diet", type: "multi", required: true, title: "以下哪些是您經常會食用的？", note: "可複選。「素食飲食」僅限平常不吃肉類與海鮮者；若仍會吃肉類或海鮮，但蔬菜比例較高，請勿勾選該項，可依實際情況勾選「蔬菜水果（每日攝取）」。", field: "diet.frequent_foods", options: ["飲酒（每週至少一次）", "燒烤或油炸食品", "紅肉（牛、羊、豬等）", "醃漬類食品（泡菜、鹹魚等）", "甜食或高糖零食", "含糖飲料", "高脂肪食物（速食、肥肉等）", "乳製品（起司、優格等）", "蔬菜水果（每日攝取）", "咖啡（每週至少 3 次）", "茶（每週至少 3 次）", "素食飲食（不吃肉類與海鮮；含全素、蛋奶素、蛋素、奶素或植物五辛素）", "無固定或少量"] },
-  { id: "milk_daily", module: "diet", type: "single", required: true, title: "是否每天飲用牛奶（至少一杯 240ml，含保久乳）？", note: "若偶爾才喝，請選否。", field: "diet.daily_milk", options: ["是，每天飲用", "否，偶爾或不飲用"] },
-  { id: "soy_products", module: "diet", type: "single", required: true, title: "是否經常食用豆類製品？", note: "例如豆漿、豆腐、豆干、毛豆等，每週 3 次以上。", field: "diet.soy_products_3x_week", options: ["是，每週 3 次以上", "否，較少食用"] },
-  { id: "probiotics", module: "diet", type: "single", required: true, title: "是否規律補充益生菌？", note: "例如優酪乳、優格、益生菌補充品等，每週 3 次以上。", field: "diet.probiotics_3x_week", options: ["是，每週 3 次以上", "否，較少補充"] },
+  { id: "diet_type", module: "diet", type: "single", required: true, title: "以下哪一項最接近您平常的飲食方式？", note: "請依長期飲食型態選擇一項。若主要吃蔬食但仍會吃肉類或海鮮，請選「蔬食為主」。", field: "diet.current_diet_type", options: ["一般飲食（平常會吃肉類或海鮮）", "蔬食為主（主要吃植物性食物，但仍會吃肉類或海鮮）", "魚素（不吃肉類，但會吃魚類或海鮮）", "蛋奶素（不吃肉類及海鮮，但會吃蛋或乳製品）", "全素（不吃肉類、海鮮、蛋及乳製品）"] },
+  { id: "meat_processed_foods", module: "diet", type: "multi", required: true, title: "肉類、加工及高溫烹調食物", note: "請依過去三個月的一般飲食狀況，勾選您通常每週會食用的項目。可複選。", field: "diet.meat_processed_foods", noneOption: "以上皆無或很少食用", options: ["紅肉（牛、羊、豬等）", "燒烤或油炸食品", "醃漬或鹽漬食品（例如泡菜、鹹魚）", "加工肉品（例如香腸、火腿、培根）", "以上皆無或很少食用"] },
+  { id: "sugar_fat_foods", module: "diet", type: "multi", required: true, title: "高糖與高脂食物", note: "請依過去三個月的一般飲食狀況，勾選您通常每週會攝取的項目。可複選。", field: "diet.sugar_fat_foods", noneOption: "以上皆無或很少攝取", options: ["甜食或高糖零食", "含糖飲料", "高脂肪食物（例如速食、肥肉）", "以上皆無或很少攝取"] },
+  { id: "plant_dairy_habits", module: "diet", type: "multi", required: true, title: "蔬果、豆類與乳製品", note: "請勾選符合日常狀況的項目。可複選。", field: "diet.plant_dairy_habits", noneOption: "以上皆無", options: ["每天攝取蔬菜或水果", "豆類或豆製品每週至少 3 次", "每天飲用至少一杯 240 ml 牛奶", "其他乳製品每週至少 3 次（例如優格、起司）", "益生菌食品或補充品每週至少 3 次", "以上皆無"] },
+  { id: "beverage_habits", module: "diet", type: "multi", required: true, title: "飲品習慣", note: "請勾選符合日常狀況的項目。可複選。", field: "diet.beverage_habits", noneOption: "以上皆無", options: ["飲酒（每週至少一次）", "咖啡（每週至少 3 次）", "茶（每週至少 3 次）", "以上皆無"] },
 
   { id: "personal_cancer", module: "history", type: "single", required: true, title: "您目前是否正在罹患癌症，或過去曾被診斷為癌症？", note: "請依照目前或過去是否曾被醫療人員診斷為癌症回答。", field: "medical_history.personal_cancer_history", options: ["是，目前正在治療或追蹤中", "是，過去曾被診斷，目前已完成治療或追蹤", "否，未曾被診斷為癌症"] },
   { id: "personal_cancer_types", module: "history", type: "multi", required: true, title: "目前或過去曾被診斷的癌別為何？", note: "可複選；若不確定癌別，請選其他癌種。", field: "medical_history.personal_cancer_types", options: cancerOptions, appliesIf: (answers) => isPersonalCancerYes(getAnswerValue(answers, "medical_history.personal_cancer_history")) },
@@ -345,7 +345,7 @@ const i18n = {
       female: ["Female Health Information", "Questions on menstruation, pregnancy, breastfeeding, Pap smear, and hormone use."],
       exposure: ["Tobacco and Environmental Exposure", "Record smoking, secondhand smoke, cooking fumes, air pollution, and radiation exposure."],
       mental: ["Mental Health", "Record recent stress, sleep, and low mood frequency."],
-      diet: ["Dietary Habits", "Collect diet type, common foods, milk, soy products, and probiotics habits."],
+      diet: ["Dietary Habits", "Review dietary pattern, meat and processed foods, high-sugar and high-fat foods, plant foods, dairy, and beverages."],
       history: ["Medical and Family History", "Confirm personal cancer history, chronic diseases, and family cancer history."],
       contact: ["Contact Information", "Enter the email address for receiving the report."],
       confirm: ["Data Review", "Please review your answers before submission."],
@@ -414,11 +414,11 @@ const i18n = {
       stress: ["In the past month, how often did you feel tense or anxious each week?", "Please answer based on your general situation in the past month."],
       sleep_problem: ["In the past month, how often did you sleep poorly or have insomnia each week?", "Please answer based on your general situation in the past month."],
       low_mood: ["In the past month, how often did you feel low or depressed each week?", "This is only for health risk factor organization and is not a mental health diagnosis."],
-      diet_type: ["What is your current dietary pattern?", "Choose the option closest to your long-term pattern. If you mainly eat plant-based foods but still consume meat or seafood, choose Flexitarian. Choose a vegetarian category only if you do not eat meat or seafood."],
-      frequent_foods: ["Which of the following do you often consume?", "You may select multiple. Select Vegetarian diet only if you do not eat meat or seafood. If you still eat meat or seafood but consume plenty of vegetables, select Vegetables and fruits instead."],
-      milk_daily: ["Do you drink milk every day (at least one 240 ml cup, including shelf-stable milk)?", "If you only drink occasionally, select no."],
-      soy_products: ["Do you often consume soy products?", "For example, soy milk, tofu, dried tofu, edamame, at least 3 times per week."],
-      probiotics: ["Do you regularly take probiotics?", "For example, yogurt drinks, yogurt, or probiotic supplements, at least 3 times per week."],
+      diet_type: ["Which option best describes your usual dietary pattern?", "Choose one long-term pattern. If you mainly eat plant-based foods but still consume meat or seafood, select Mostly plant-based."],
+      meat_processed_foods: ["Meat, processed foods, and high-temperature cooking", "Based on your usual diet during the past 3 months, select items you typically eat each week. You may select multiple."],
+      sugar_fat_foods: ["High-sugar and high-fat foods", "Based on your usual diet during the past 3 months, select items you typically consume each week. You may select multiple."],
+      plant_dairy_habits: ["Fruit, vegetables, soy, and dairy", "Select every item that matches your usual habits. You may select multiple."],
+      beverage_habits: ["Beverage habits", "Select every item that matches your usual habits. You may select multiple."],
       personal_cancer: ["Are you currently living with cancer, or have you ever been diagnosed with cancer in the past?", "Please answer based on whether a healthcare professional has diagnosed you with cancer, either currently or in the past."],
       personal_cancer_types: ["What type of cancer are you currently living with, or have you been diagnosed with in the past?", "You may select multiple. If you are unsure of the exact type, please select other cancer type."],
       chronic_conditions: ["Do you have any of the following chronic diseases?", "You may select multiple. If none apply, select none of the above."],
@@ -442,9 +442,10 @@ const i18n = {
       "是，已戒菸": "Yes, quit smoking", "否，仍在抽菸": "No, still smoking",
       "少於一次": "Less than once", "每週 1-3 次": "1-3 times per week", "每週 4-6 次": "4-6 times per week", "每週 6 次以上": "6 or more times per week",
       "不到 1 天": "Less than 1 day", "2-3 天": "2-3 days", "4-5 天": "4-5 days", "幾乎每天": "Almost every day",
+      "一般飲食（平常會吃肉類或海鮮）": "General diet (usually includes meat or seafood)", "蔬食為主（主要吃植物性食物，但仍會吃肉類或海鮮）": "Mostly plant-based (still includes meat or seafood)", "魚素（不吃肉類，但會吃魚類或海鮮）": "Pescatarian (no meat, but includes fish or seafood)", "蛋奶素（不吃肉類及海鮮，但會吃蛋或乳製品）": "Ovo-lacto vegetarian (no meat or seafood, but includes eggs or dairy)", "全素（不吃肉類、海鮮、蛋及乳製品）": "Vegan (no meat, seafood, eggs, or dairy)",
       "葷食（會食用肉類或海鮮，無特別飲食限制）": "Omnivorous diet (includes meat or seafood; no specific dietary restriction)", "全素": "Vegan", "蛋奶素": "Ovo-lacto vegetarian", "蛋素": "Ovo vegetarian", "奶素": "Lacto vegetarian", "植物五辛素": "Vegetarian including five pungent vegetables",
       "地中海飲食（以蔬果、全穀、豆類、橄欖油、堅果為主，適量魚類）": "Mediterranean diet", "彈性蔬食（以植物性食物為主，但仍會食用肉類、魚類或海鮮）": "Flexitarian diet (mostly plant-based but still includes meat, fish, or seafood)", "健康蔬食／全植物飲食（以天然植物性食物為主，少加工食品）": "Whole-food plant-based diet", "高蔬果、低鹽飲食（以蔬菜、水果、全穀類、低脂乳品為主，減少鹽分及加工食品）": "High fruit/vegetable, low-salt diet", "生酮飲食（大幅減少澱粉與糖分，以肉類、蛋類、油脂及高脂肪食物為主）": "Ketogenic diet", "低醣飲食（減少飯、麵、麵包及含糖飲料攝取）": "Low-carbohydrate diet", "間歇性斷食（限制進食時間，例如每天只在固定時段進食）": "Intermittent fasting",
-      "飲酒（每週至少一次）": "Alcohol (at least once per week)", "燒烤或油炸食品": "Grilled or fried foods", "紅肉（牛、羊、豬等）": "Red meat (beef, lamb, pork, etc.)", "醃漬類食品（泡菜、鹹魚等）": "Pickled foods", "甜食或高糖零食": "Sweets or high-sugar snacks", "含糖飲料": "Sugary drinks", "高脂肪食物（速食、肥肉等）": "High-fat foods", "乳製品（起司、優格等）": "Dairy products", "蔬菜水果（每日攝取）": "Vegetables and fruits (daily)", "咖啡（每週至少 3 次）": "Coffee (at least 3 times per week)", "茶（每週至少 3 次）": "Tea (at least 3 times per week)", "素食飲食（不吃肉類與海鮮；含全素、蛋奶素、蛋素、奶素或植物五辛素）": "Vegetarian diet (no meat or seafood; includes vegan, ovo-lacto, ovo, lacto, or five-pungent vegetarian diets)", "無固定或少量": "No fixed pattern or small amount",
+      "飲酒（每週至少一次）": "Alcohol (at least once per week)", "燒烤或油炸食品": "Grilled or fried foods", "紅肉（牛、羊、豬等）": "Red meat (beef, lamb, pork, etc.)", "醃漬類食品（泡菜、鹹魚等）": "Pickled foods", "醃漬或鹽漬食品（例如泡菜、鹹魚）": "Pickled or salted foods (such as kimchi or salted fish)", "加工肉品（例如香腸、火腿、培根）": "Processed meat (such as sausage, ham, or bacon)", "甜食或高糖零食": "Sweets or high-sugar snacks", "含糖飲料": "Sugary drinks", "高脂肪食物（速食、肥肉等）": "High-fat foods", "高脂肪食物（例如速食、肥肉）": "High-fat foods (such as fast food or fatty meat)", "乳製品（起司、優格等）": "Dairy products", "蔬菜水果（每日攝取）": "Vegetables and fruits (daily)", "每天攝取蔬菜或水果": "Eat vegetables or fruit every day", "豆類或豆製品每週至少 3 次": "Soybeans or soy products at least 3 times per week", "每天飲用至少一杯 240 ml 牛奶": "At least one 240 ml cup of milk every day", "其他乳製品每週至少 3 次（例如優格、起司）": "Other dairy products at least 3 times per week (such as yogurt or cheese)", "益生菌食品或補充品每週至少 3 次": "Probiotic foods or supplements at least 3 times per week", "咖啡（每週至少 3 次）": "Coffee (at least 3 times per week)", "茶（每週至少 3 次）": "Tea (at least 3 times per week)", "素食飲食（不吃肉類與海鮮；含全素、蛋奶素、蛋素、奶素或植物五辛素）": "Vegetarian diet (no meat or seafood; includes vegan, ovo-lacto, ovo, lacto, or five-pungent vegetarian diets)", "無固定或少量": "No fixed pattern or small amount", "以上皆無或很少食用": "None of the above or rarely eaten", "以上皆無或很少攝取": "None of the above or rarely consumed",
       "是，每天飲用": "Yes, daily", "否，偶爾或不飲用": "No, occasional or none", "是，每週 3 次以上": "Yes, at least 3 times per week", "否，較少食用": "No, rarely", "否，較少補充": "No, rarely",
       "是，目前正在治療或追蹤中": "Yes, currently under treatment or follow-up",
       "是，過去曾被診斷，目前已完成治療或追蹤": "Yes, diagnosed in the past; treatment or follow-up has been completed",
@@ -474,6 +475,7 @@ const optimizedFeatureColumns = [
 ];
 
 const symptomFeatureColumns = symptomGroups.flatMap((group) => group.options.map(([, , column]) => column));
+const researchFeatureColumns = ["processed_meat"];
 
 const answers = {};
 let currentIndex = 0;
@@ -1125,6 +1127,7 @@ function renderQuickInput(question) {
   if (question.type === "multi") {
     const isConsentQuestion = question.id === "consent_acknowledgement";
     const isSymptomQuestion = question.isSymptomGroup === true;
+    const hasExclusiveNoneOption = Boolean(question.noneOption);
     const visibleOptions = question.options.filter((option) => {
       if (!isSymptomQuestion || getAnswerValue(answers, "demographics.sex") === "女性") return true;
       const definition = question.symptomDefinitions?.find(([label]) => label === option);
@@ -1153,11 +1156,11 @@ function renderQuickInput(question) {
         const value = button.dataset.value;
         if (multiSelection.has(value)) {
           multiSelection.delete(value);
-        } else if (isSymptomQuestion && value === question.noneOption) {
+        } else if (hasExclusiveNoneOption && value === question.noneOption) {
           multiSelection.clear();
           multiSelection.add(value);
         } else {
-          if (isSymptomQuestion) multiSelection.delete(question.noneOption);
+          if (hasExclusiveNoneOption) multiSelection.delete(question.noneOption);
           multiSelection.add(value);
         }
         updateMultiButtons();
@@ -1425,16 +1428,35 @@ function mapFemaleValue(valueMap, field) {
 function buildOptimizedFeatureRow() {
   const sex = getAnswerValue(answers, "demographics.sex");
   const dietType = getAnswerValue(answers, "diet.current_diet_type");
-  const frequentFoods = getAnswerValue(answers, "diet.frequent_foods");
-  const foodList = Array.isArray(frequentFoods) ? frequentFoods : [];
+  const legacyFrequentFoods = getAnswerValue(answers, "diet.frequent_foods");
+  const meatProcessedFoods = getAnswerValue(answers, "diet.meat_processed_foods");
+  const sugarFatFoods = getAnswerValue(answers, "diet.sugar_fat_foods");
+  const plantDairyHabits = getAnswerValue(answers, "diet.plant_dairy_habits");
+  const beverageHabits = getAnswerValue(answers, "diet.beverage_habits");
+  const foodList = [
+    ...(Array.isArray(legacyFrequentFoods) ? legacyFrequentFoods : []),
+    ...(Array.isArray(meatProcessedFoods) ? meatProcessedFoods : []),
+    ...(Array.isArray(sugarFatFoods) ? sugarFatFoods : []),
+    ...(Array.isArray(plantDairyHabits) ? plantDairyHabits : []),
+    ...(Array.isArray(beverageHabits) ? beverageHabits : [])
+  ];
   const cookingFrequency = getAnswerValue(answers, "exposure.weekly_cooking_frequency");
   const anxiety = getAnswerValue(answers, "mental_health.weekly_stress_frequency");
   const insomnia = getAnswerValue(answers, "mental_health.weekly_sleep_problem_frequency");
   const depression = getAnswerValue(answers, "mental_health.weekly_low_mood_frequency");
   const firstPregnancyAge = getAnswerValue(answers, "female_health.first_pregnancy_age");
   const breastfeedingHistory = getAnswerValue(answers, "female_health.breastfeeding_history");
-  const vegetarianDietTypes = ["全素", "蛋奶素", "蛋素", "奶素", "植物五辛素"];
+  const vegetarianDietTypes = [
+    "全素",
+    "蛋奶素",
+    "蛋素",
+    "奶素",
+    "植物五辛素",
+    "蛋奶素（不吃肉類及海鮮，但會吃蛋或乳製品）",
+    "全素（不吃肉類、海鮮、蛋及乳製品）"
+  ];
   const explicitlyVegetarian = vegetarianDietTypes.includes(dietType) || dietType?.startsWith("健康蔬食／全植物飲食");
+  const plantDairyAnswered = Boolean(answers["diet.plant_dairy_habits"] || answers["diet.daily_milk"]);
   const personalCancerHistory = getAnswerValue(answers, "medical_history.personal_cancer_history");
   const row = {
     record_id: `WEB-${Date.now()}`,
@@ -1488,11 +1510,12 @@ function buildOptimizedFeatureRow() {
     red_meat: foodList.some((item) => item.includes("紅肉")) ? 1 : 0,
     sweets_junk: foodList.some((item) => item.includes("甜食")) ? 1 : 0,
     sugary_drinks: foodList.some((item) => item.includes("含糖飲料")) ? 1 : 0,
-    vegetables_fruits: foodList.some((item) => item.includes("蔬菜水果")) ? 1 : 0,
+    vegetables_fruits: foodList.some((item) => item.includes("蔬菜水果") || item.includes("蔬菜或水果")) ? 1 : 0,
     high_fat_food_missing: foodList.some((item) => item.includes("高脂肪")) ? 0 : 1,
     high_fat_food: foodList.some((item) => item.includes("高脂肪")) ? 1 : 0,
-    dairy_missing: getAnswerValue(answers, "diet.daily_milk") ? 0 : 1,
-    dairy: getAnswerValue(answers, "diet.daily_milk") === "是，每天飲用" || foodList.some((item) => item.includes("乳製品")) ? 1 : 0,
+    dairy_missing: plantDairyAnswered ? 0 : 1,
+    dairy: getAnswerValue(answers, "diet.daily_milk") === "是，每天飲用"
+      || foodList.some((item) => item.includes("牛奶") || item.includes("乳製品")) ? 1 : 0,
     coffee_habit_missing: foodList.some((item) => item.includes("咖啡")) ? 0 : 1,
     tea_habit_missing: foodList.some((item) => item.includes("茶")) ? 0 : 1,
     coffee_habit: foodList.some((item) => item.includes("咖啡")) ? 1 : 0,
@@ -1583,7 +1606,15 @@ function buildSymptomAnswers() {
   });
 }
 
-function buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symptomAnswers) {
+function buildResearchFeatureRow() {
+  const selected = getAnswerValue(answers, "diet.meat_processed_foods");
+  const foodList = Array.isArray(selected) ? selected : [];
+  return {
+    processed_meat: foodList.some((item) => item.includes("加工肉品")) ? 1 : 0
+  };
+}
+
+function buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symptomAnswers, researchFeatureRow) {
   const symptomEntry = Object.values(answers).find((entry) => entry.field === "recent_health.recent_discomfort");
   const personalCancerTypeEntry = Object.values(answers).find((entry) => entry.field === "medical_history.personal_cancer_types");
   const structured = symptomEntry?.structured || {};
@@ -1591,10 +1622,14 @@ function buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symp
   const personalCancerTypes = personalCancerTypeEntry?.value
     ? (Array.isArray(personalCancerTypeEntry.value) ? personalCancerTypeEntry.value.join("; ") : String(personalCancerTypeEntry.value))
     : "";
+  const researchExcelFields = Object.fromEntries(
+    Object.entries(researchFeatureRow).map(([column, value]) => [`research_${column}`, value])
+  );
 
   return {
     ...optimizedFeatureRow,
     ...symptomFeatureRow,
+    ...researchExcelFields,
     submitted_at: submittedAt,
     email: getAnswerValue(answers, "contact.email") || "",
     language: currentLang,
@@ -1630,6 +1665,7 @@ function storeSubmissionForIntegration() {
   const aiApiFeatureRow = buildAiApiFeatureRow(optimizedFeatureRow);
   const symptomFeatureRow = buildSymptomFeatureRow();
   const symptomAnswers = buildSymptomAnswers();
+  const researchFeatureRow = buildResearchFeatureRow();
   const missingColumns = optimizedFeatureColumns.filter((column) => optimizedFeatureRow[column] === "" && column !== "score");
   const submission = {
     submitted_at: submittedAt,
@@ -1643,7 +1679,9 @@ function storeSubmissionForIntegration() {
     symptom_feature_columns: symptomFeatureColumns,
     symptom_feature_row: symptomFeatureRow,
     symptom_answers: symptomAnswers,
-    excel_row: buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symptomAnswers),
+    research_feature_columns: researchFeatureColumns,
+    research_feature_row: researchFeatureRow,
+    excel_row: buildExcelRow(optimizedFeatureRow, submittedAt, symptomFeatureRow, symptomAnswers, researchFeatureRow),
     data_quality: {
       missing_columns: missingColumns,
       contradiction_warnings: checkOptimizedFeatureRow(optimizedFeatureRow)
@@ -1757,6 +1795,8 @@ async function renderResult() {
         symptom_columns: submission.symptom_feature_columns,
         symptom_row: submission.symptom_feature_row,
         symptom_answers: submission.symptom_answers,
+        research_columns: submission.research_feature_columns,
+        research_row: submission.research_feature_row,
         data_quality: submission.data_quality
       })}</script>
     </div>
